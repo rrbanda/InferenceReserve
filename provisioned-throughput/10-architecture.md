@@ -141,23 +141,39 @@ Estimated complexity: ~800 lines of Go or Python. Stateless; reads from Kubernet
 
 > **Vertex PT comparison note** (see [`12-vertex-pt-comparison.md`](12-vertex-pt-comparison.md)): Vertex auto-activates PT per GCP project with no code change. Our Phase 1 requires the `x-tenant-id` header. Phase 2 should implement namespace-based or mTLS-based identity resolution so that traffic from a PT tenant's namespace automatically routes to PT without headers — reducing UX friction to near-zero.
 
-**Spillover Logic**
+**Enforcement and Spillover — llm-d Flow Control**
 
-> **Phase 1:** No spillover. Each tenant has dedicated pods with no shared pool fallback. Requests exceeding the PT pool's `max-num-seqs` capacity receive a 429. This is the simplest correct implementation.
+PT enforcement uses [llm-d's built-in flow control](https://github.com/alexagriffith/flow-control-benchmarks), not a custom-built quota check. Flow control is already part of the EPP and has been benchmarked on H100 GPUs with mixed-priority workloads.
 
-> **Phase 2:** Pre-routing spillover via the PT Auth Service. The approach mirrors Google Vertex AI's pre-routing quota check — the routing decision happens BEFORE the request reaches the serving pod, not after a failure.
+**How it works:**
 
-Phase 2 spillover implementation:
+1. **Priority bands.** The PT Auth Service (ext_authz) resolves the tenant's InferenceObjective, which maps to a priority band in EPP's flow controller:
+   - **Realtime** — PT requests (highest priority, always dispatched first)
+   - **Standard** — shared serving requests (dispatched when capacity allows)
+   - **Batch** — batch inference (dispatched only when higher-priority bands have headroom)
 
-1. The PT Auth Service maintains a lightweight per-tenant consumed-TPM counter, updated every second from vLLM Prometheus metrics (`prompt_tokens_total` + `generation_tokens_total`)
-2. On each incoming request, the Auth Service estimates the request's weighted token cost using the tenant's burndown rates and average historical output length
-3. If the estimated cost fits within remaining PT quota for the current enforcement window: route to PT pool (`pool_assignment: pt`)
-4. If the estimated cost exceeds remaining PT quota: route to shared pool (`pool_assignment: shared`) and tag as `request_type: spillover` in dynamic metadata
-5. After request completion, reconcile actual token count against the estimate
+2. **Per-tenant fairness.** Within each priority band, EPP maintains per-tenant queues keyed by fairness ID. No single PT tenant can starve another PT tenant at the same priority level.
 
-This pre-routing approach avoids the latency penalty of retry-based spillover (where the request fails first, then retries to the shared pool) and correctly distinguishes tenant quota exhaustion from infrastructure 429s (vLLM at max concurrency).
+3. **Reserved capacity (`priority-holdback-policy`).** The dispatch gate compares pool-wide in-flight request count against per-priority-band usage ceilings. This reserves capacity for PT requests — lower-priority work waits in EPP's queue until the PT band has headroom. Benchmarked result: Realtime p95 TTFT dropped from 561ms to 341ms (39% improvement) with reserved capacity enabled.
 
-Billing: the gateway access log captures `request_type` (dedicated / spillover / shared) from dynamic metadata. The chargeback pipeline charges the flat committed rate for dedicated traffic and the shared serving rate for spillover traffic.
+4. **Spillover.** When a PT tenant's traffic exceeds reserved capacity, the flow controller queues the excess. If the tenant's InferenceObjective allows spillover, excess requests dispatch at Standard priority instead of Realtime. This is pre-dispatch spillover — the request never reaches vLLM at the wrong priority.
+
+5. **Batch eviction.** When PT traffic arrives and batch work is already running inside vLLM, EPP's ReclamationController can evict eligible lower-priority batch requests. Envoy returns 429 to the Async Processor, which safely retries the evicted batch request. Benchmarked result: zero data loss across all evictions; Realtime p95 TTFT stayed at 348ms (baseline: 342ms without batch).
+
+**What this replaces in our architecture:**
+
+| Previously Proposed (Custom Build) | Now Upstream (llm-d Flow Control) |
+|---|---|
+| Pre-routing quota check in Auth Service | EPP dispatch gate with priority-band usage ceilings |
+| Per-tenant TPM budget counter | Per-tenant fairness queues in flow controller |
+| Custom spillover controller | InferenceObjective priority → dispatch admission |
+| Phase 2 enforcement timeline | Available now in llm-d v0.9+ (benchmarked) |
+
+**The PT Auth Service still handles tenant identity resolution** (ext_authz: resolve tenant from header, namespace, or mTLS), but it does NOT implement the quota check — it sets the InferenceObjective header that the EPP's flow controller uses.
+
+**Evidence:** [flow-control-benchmarks](https://github.com/alexagriffith/flow-control-benchmarks) — tested on H100 with request-count admission, token-aware admission, reserved capacity, and batch eviction. Consolidation, priority tiers, batch isolation, and same-priority fairness all benchmarked with n=3 repeats.
+
+> **Architectural consequence:** llm-d flow control enables **shared GPU pools with priority-based isolation** instead of dedicated PT nodes. This means physical node isolation (taints + affinity) is a conservative Phase 1 choice, not a permanent architectural requirement. Flow control with InferenceObjective priority bands achieves the same latency protection with dramatically better fleet utilisation. The Phase 2 evaluation of logical isolation is now backed by benchmark evidence, not just a hypothesis.
 
 ---
 

@@ -13,9 +13,9 @@ export const features: Feature[] = [
   },
   {
     id: 2,
-    title: 'GPU Isolation',
+    title: 'GPU Isolation + Flow Control',
     description:
-      'Phase 1: physical isolation via node taints — no shared workloads on PT hardware. Phase 2: evaluates logical isolation via InferenceObjective priority for better fleet utilisation.',
+      'Phase 1: physical node isolation via taints. Phase 2: logical isolation via llm-d flow control — priority bands, reserved capacity, and per-tenant fairness on shared GPUs. Benchmarked: Realtime stays at ~500ms p95 TTFT while lower-priority work absorbs the wait.',
   },
   {
     id: 3,
@@ -25,9 +25,9 @@ export const features: Feature[] = [
   },
   {
     id: 4,
-    title: 'Spillover to Shared Pool',
+    title: 'Priority Spillover via Flow Control',
     description:
-      'Phase 1: dedicated pods only, 429 on overflow. Phase 2: pre-routing quota check spills overflow to the shared pool transparently. Tenants can opt into strict mode (dedicated only) via header.',
+      'llm-d flow control queues lower-priority requests when PT capacity is reserved. Overflow dispatches at Standard priority. Batch eviction reclaims capacity from lower-priority work already in vLLM. Zero data loss — evicted requests are safely retried.',
   },
   {
     id: 5,

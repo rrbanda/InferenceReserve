@@ -14,7 +14,7 @@ const rows = [
   {
     dimension: 'GPU Isolation',
     shared: 'Multi-tenant, shared nodes',
-    pt: 'Phase 1: dedicated tainted nodes. Phase 2: evaluates logical isolation for better fleet utilisation.',
+    pt: 'Phase 1: dedicated tainted nodes. Phase 2: logical isolation via llm-d flow control (benchmarked on H100).',
   },
   {
     dimension: 'Routing',
@@ -24,7 +24,7 @@ const rows = [
   {
     dimension: 'Overflow Handling',
     shared: 'HTTP 429 rate limiting',
-    pt: 'Phase 1: 429 on overflow. Phase 2: pre-routing spillover to shared pool.',
+    pt: 'Phase 1: 429 on overflow. Phase 2: llm-d flow control queues lower-priority work; batch eviction reclaims capacity.',
   },
   {
     dimension: 'Observability',

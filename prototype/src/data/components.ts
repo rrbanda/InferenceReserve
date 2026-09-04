@@ -33,10 +33,10 @@ export const components: ArchComponent[] = [
     phase: 1,
   },
   {
-    name: 'llm-d Endpoint Picker',
+    name: 'llm-d EPP + Flow Control',
     upstream: 'llm-d/llm-d-router',
-    status: 'Production',
-    role: 'Picks the optimal vLLM pod per request via ext_proc: prefix-cache locality, KV-cache occupancy, queue depth. Auto-created by KServe.',
+    status: 'Production (benchmarked)',
+    role: 'Picks the optimal vLLM pod via ext_proc. Flow control enforces priority bands (Realtime > Standard > Batch), per-tenant fairness, reserved capacity, and batch eviction. This is the PT enforcement mechanism.',
     isCustom: false,
     phase: 1,
   },
