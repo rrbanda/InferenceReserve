@@ -1,0 +1,34 @@
+.wrapper {
+  background: var(--color-code-bg);
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  margin: var(--space-md) 0;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-sm) var(--space-md);
+  background: rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.lang {
+  font-size: var(--font-size-xs);
+  color: var(--color-accent-blue);
+  font-weight: var(--font-weight-medium);
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.code {
+  padding: var(--space-md);
+  overflow-x: auto;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--color-text-on-code);
+  white-space: pre;
+}

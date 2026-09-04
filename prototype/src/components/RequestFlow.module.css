@@ -1,0 +1,94 @@
+.wrapper {
+  background: var(--color-bg-white);
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: var(--space-xl);
+  margin-bottom: var(--space-2xl);
+}
+
+.title {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-deep-navy);
+  margin-bottom: var(--space-lg);
+  text-align: center;
+}
+
+.flow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  overflow-x: auto;
+  padding: var(--space-md) 0;
+}
+
+.node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.nodeBubble {
+  width: 72px;
+  height: 72px;
+  border-radius: var(--border-radius);
+  border: 2px solid var(--color-card-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
+  text-align: center;
+  padding: var(--space-xs);
+  transition: all 0.3s ease;
+}
+
+.nodeLabel {
+  font-size: 10px;
+  color: var(--color-text-muted);
+  text-align: center;
+  max-width: 72px;
+}
+
+.arrow {
+  width: 32px;
+  height: 2px;
+  background: var(--color-card-border);
+  flex-shrink: 0;
+  position: relative;
+}
+
+.arrow::after {
+  content: '›';
+  position: absolute;
+  right: -4px;
+  top: -10px;
+  font-size: 16px;
+  color: var(--color-card-border);
+}
+
+.controls {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--space-md);
+}
+
+.replayBtn {
+  padding: var(--space-sm) var(--space-lg);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-accent-blue);
+  border: var(--border-width) solid var(--color-accent-blue);
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  background: transparent;
+}
+
+.replayBtn:hover {
+  background: var(--color-accent-blue);
+  color: var(--color-text-on-dark);
+}

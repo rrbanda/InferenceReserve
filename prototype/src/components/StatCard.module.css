@@ -1,0 +1,22 @@
+.card {
+  background: rgba(255, 255, 255, 0.08);
+  border: var(--border-width) solid rgba(255, 255, 255, 0.15);
+  border-radius: var(--border-radius);
+  padding: var(--space-sm) var(--space-lg);
+  text-align: center;
+  min-width: 130px;
+  border-top: 2px solid var(--color-accent-blue);
+}
+
+.value {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-on-dark);
+  margin-bottom: 1px;
+}
+
+.label {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: var(--font-weight-medium);
+}

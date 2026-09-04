@@ -1,0 +1,26 @@
+.wrapper {
+  background: var(--color-bg-white);
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: var(--space-xl);
+  margin-bottom: var(--space-2xl);
+  overflow-x: auto;
+  text-align: center;
+}
+
+.wrapper svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.error {
+  color: var(--color-danger-red);
+  font-size: var(--font-size-sm);
+  padding: var(--space-md);
+}
+
+.loading {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  padding: var(--space-xl);
+}

@@ -1,0 +1,12 @@
+.wrapper {
+  width: 100%;
+  overflow-x: auto;
+  padding: var(--space-sm) 0;
+}
+
+.svg {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  display: block;
+}

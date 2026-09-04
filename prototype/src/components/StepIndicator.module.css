@@ -1,0 +1,74 @@
+.wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: var(--space-2xl);
+  gap: 0;
+}
+
+.step {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.circle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  transition: all var(--transition-base);
+  border: 2px solid var(--color-card-border);
+  color: var(--color-text-muted);
+  background: var(--color-bg-white);
+  flex-shrink: 0;
+}
+
+.circleActive {
+  composes: circle;
+  background: var(--color-accent-blue);
+  border-color: var(--color-accent-blue);
+  color: var(--color-text-on-dark);
+}
+
+.circleCompleted {
+  composes: circle;
+  background: var(--color-deep-navy);
+  border-color: var(--color-deep-navy);
+  color: var(--color-text-on-dark);
+}
+
+.line {
+  width: 40px;
+  height: 2px;
+  background: var(--color-card-border);
+  flex-shrink: 0;
+}
+
+.lineCompleted {
+  composes: line;
+  background: var(--color-deep-navy);
+}
+
+.label {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  margin-top: var(--space-xs);
+  text-align: center;
+  position: absolute;
+  bottom: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+
+.stepContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}

@@ -1,0 +1,77 @@
+.card {
+  background: var(--color-bg-white);
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--border-radius);
+  margin-bottom: var(--space-md);
+  overflow: hidden;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-md) var(--space-lg);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.header:hover {
+  background: var(--color-bg-light);
+}
+
+.stepNumber {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--color-deep-navy);
+  color: var(--color-text-on-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  flex-shrink: 0;
+}
+
+.stepNumberActive {
+  composes: stepNumber;
+  background: var(--color-accent-blue);
+}
+
+.titleGroup {
+  flex: 1;
+}
+
+.title {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-deep-navy);
+}
+
+.subtitle {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.chevron {
+  font-size: var(--font-size-lg);
+  color: var(--color-text-muted);
+  transition: transform var(--transition-base);
+}
+
+.chevronOpen {
+  composes: chevron;
+  transform: rotate(180deg);
+}
+
+.body {
+  padding: 0 var(--space-lg) var(--space-lg);
+  padding-left: calc(32px + var(--space-md) + var(--space-lg));
+}
+
+.description {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-relaxed);
+  margin-bottom: var(--space-md);
+}

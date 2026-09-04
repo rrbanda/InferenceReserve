@@ -1,0 +1,9 @@
+.section {
+  padding: 0;
+}
+
+.body {
+  padding: var(--space-xl) var(--space-xl) var(--space-2xl);
+  max-width: var(--max-width);
+  margin: 0 auto;
+}

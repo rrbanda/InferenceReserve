@@ -1,0 +1,143 @@
+.section {
+  padding: var(--space-xl);
+  background: var(--color-bg-light);
+  min-height: calc(100vh - var(--header-height) - 60px);
+}
+
+.inner {
+  max-width: var(--max-width);
+  margin: 0 auto;
+}
+
+.tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: var(--space-lg);
+  border-bottom: 2px solid var(--border-color);
+}
+
+.tab {
+  padding: var(--space-sm) var(--space-lg);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: all var(--transition-fast);
+  background: none;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+}
+
+.tab:hover {
+  color: var(--color-deep-navy);
+}
+
+.tabActive {
+  composes: tab;
+  color: var(--color-accent-blue);
+  border-bottom-color: var(--color-accent-blue);
+  font-weight: var(--font-weight-semibold);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-md);
+}
+
+.grid2col {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-md);
+  margin-bottom: var(--space-md);
+}
+
+.reservationsTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.reservationsTable th {
+  background: var(--color-deep-navy);
+  color: var(--color-text-on-dark);
+  padding: var(--space-xs) var(--space-md);
+  text-align: left;
+  font-size: 11px;
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.reservationsTable td {
+  padding: var(--space-xs) var(--space-md);
+  font-size: var(--font-size-sm);
+  border-bottom: 1px solid var(--color-card-border);
+}
+
+.reservationsTable tr:last-child td {
+  border-bottom: none;
+}
+
+.slaPass {
+  color: var(--color-success-green);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-xs);
+}
+
+.slaRisk {
+  color: var(--color-warning-amber);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-xs);
+}
+
+.slaBreach {
+  color: var(--color-danger-red);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-xs);
+}
+
+.slaIndicators {
+  display: flex;
+  gap: var(--space-md);
+  justify-content: center;
+  margin-top: var(--space-md);
+}
+
+.slaCard {
+  text-align: center;
+  padding: var(--space-sm) var(--space-lg);
+  border: 1px solid var(--color-card-border);
+  border-radius: var(--border-radius);
+  background: var(--color-bg-white);
+  min-width: 140px;
+}
+
+.slaValue {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+}
+
+.slaLabel {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  margin-top: 2px;
+}
+
+@media (max-width: 900px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .grid2col {
+    grid-template-columns: 1fr;
+  }
+}

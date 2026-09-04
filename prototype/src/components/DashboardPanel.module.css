@@ -1,0 +1,29 @@
+.panel {
+  background: var(--color-bg-white);
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: var(--space-lg);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: var(--space-md);
+}
+
+.title {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-deep-navy);
+}
+
+.timeRange {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.chartArea {
+  width: 100%;
+  height: 200px;
+}

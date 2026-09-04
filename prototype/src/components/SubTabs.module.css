@@ -1,0 +1,30 @@
+.container {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--color-card-border);
+  margin-bottom: var(--space-lg);
+}
+
+.tab {
+  padding: var(--space-sm) var(--space-md);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.tab:hover {
+  color: var(--color-text-primary);
+}
+
+.tab.active {
+  color: var(--color-primary-navy);
+  border-bottom-color: var(--color-accent-blue);
+  font-weight: var(--font-weight-semibold);
+}

@@ -1,0 +1,46 @@
+.wrapper {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th {
+  background: var(--color-deep-navy);
+  color: var(--color-text-on-dark);
+  padding: var(--space-sm) var(--space-md);
+  text-align: left;
+  font-size: 11px;
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.row td {
+  border-bottom: 1px solid var(--color-card-border);
+}
+
+.customRow td {
+  border-bottom: 1px solid var(--color-card-border);
+  background: rgba(0, 163, 224, 0.04);
+}
+
+.nameCell {
+  padding: var(--space-sm) var(--space-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-deep-navy);
+  white-space: nowrap;
+}
+
+.customRow .nameCell {
+  color: var(--color-accent-blue);
+}
+
+.cell {
+  padding: var(--space-sm) var(--space-md);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+}

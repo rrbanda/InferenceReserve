@@ -1,0 +1,122 @@
+.wrapper {
+  max-width: 900px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2xl);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.fieldGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+}
+
+.sublabel {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.select {
+  padding: var(--space-sm) var(--space-md);
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--border-radius);
+  font-size: var(--font-size-base);
+  color: var(--color-text-primary);
+  background: var(--color-bg-white);
+}
+
+.select:focus {
+  outline: 2px solid var(--color-accent-blue);
+  outline-offset: 1px;
+}
+
+.sliderRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.slider {
+  flex: 1;
+  accent-color: var(--color-accent-blue);
+  height: 4px;
+}
+
+.sliderValue {
+  min-width: 60px;
+  text-align: right;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-deep-navy);
+  font-variant-numeric: tabular-nums;
+}
+
+.results {
+  background: var(--color-bg-white);
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--border-radius);
+  border-top: 3px solid var(--color-accent-blue);
+  padding: var(--space-xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.resultsTitle {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-deep-navy);
+  margin-bottom: var(--space-sm);
+}
+
+.resultRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: var(--space-sm) 0;
+  border-bottom: var(--border-width) solid var(--border-color);
+}
+
+.resultRow:last-child {
+  border-bottom: none;
+}
+
+.resultLabel {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.resultValue {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-deep-navy);
+  font-variant-numeric: tabular-nums;
+}
+
+.tierBadge {
+  display: inline-block;
+  padding: 4px 16px;
+  border-radius: var(--border-radius);
+  background: var(--color-accent-blue);
+  color: var(--color-text-on-dark);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+}
+
+.costValue {
+  composes: resultValue;
+  color: var(--color-success-green);
+}
