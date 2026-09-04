@@ -55,14 +55,14 @@ Google deliberately hides hardware from the PT buyer. A customer purchases GSUs 
 
 ### 2.3 Open Questions on Vertex PT to Close in Research
 
-| # | Question | How to Research |
-|---|---|---|
-| VQ1 | Exact GSU burndown rates per model (Gemini 3.6 Flash, Pro, etc.) — tokens/sec per GSU and input/output burndown multipliers | Vertex pricing page + test account |
-| VQ2 | ~~Hard reject vs. queue vs. on-demand spillover above PT quota~~ **RESOLVED:** overages billed as pay-as-you-go by default | Confirmed from Vertex documentation |
-| VQ3 | Is PT isolation physical (separate hardware) or logical (scheduling priority)? | Load test PT and shared pool simultaneously; measure interference |
-| VQ4 | Minimum GSU purchase per model | Pricing page + sales contact |
-| VQ5 | PT SLA commitment — is TTFT guaranteed or only availability? | Vertex SLA documentation |
-| VQ6 | Monitoring: what does the GSU utilisation dashboard show, exactly? | Console screenshot |
+| # | Question | Status | Resolution |
+|---|---|---|---|
+| VQ1 | Exact GSU burndown rates per model | **RESOLVED** | Full burndown tables documented in `15-vertex-pt-reference.md` Section 3. Examples: Gemini 3.6 Flash = 675 tok/sec/GSU, output 5x input, cached 0.1x. Gemini 2.5 Pro = 650 tok/sec/GSU, output 8x, >200K input doubles all rates. 18 Claude models, 16 open models also catalogued. |
+| VQ2 | Hard reject vs. queue vs. on-demand spillover above PT quota | **RESOLVED** | Default: auto-spillover to PayGo. Customer can force dedicated-only (429 on overflow) via `X-Vertex-AI-LLM-Request-Type: dedicated` header. No queuing option exists. |
+| VQ3 | Is PT isolation physical (separate hardware) or logical (scheduling priority)? | **RESOLVED** | Logical. Google documentation states: "PT reserves throughput units (GSU), not hardware exclusivity." Isolation is scheduling priority, not dedicated GPUs. |
+| VQ4 | Minimum GSU purchase per model | **RESOLVED** | Most Google models: 1 GSU minimum. Claude Sonnet: 25 GSU. Claude Opus: 35 GSU. Claude Haiku: 5-10 GSU. Open models: 1 GSU. Full table in `15-vertex-pt-reference.md` Section 3. |
+| VQ5 | PT SLA commitment — is TTFT guaranteed or only availability? | **RESOLVED** | Both: (1) 99.5%+ availability SLA with 429-to-5XX conversion for within-PT-quota errors, and (2) 99% latency target attainment with financial credits. No fixed P95 TTFT guarantee — Vertex uses "latency target attainment" model. p99 <400ms is the benchmark. |
+| VQ6 | Monitoring: what does the GSU utilisation dashboard show? | **RESOLVED** | Cloud Monitoring on `aiplatform.googleapis.com/PublisherModel`: `dedicated_gsu_limit`, `consumed_token_throughput`, `dedicated_token_limit`, split by `request_type` (dedicated/spillover/shared). 1-minute minimum alignment. Model Garden dashboard recommended at <=6h time windows. Full detail in `15-vertex-pt-reference.md` Section 10. |
 
 ---
 

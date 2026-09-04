@@ -17,8 +17,8 @@ export default function Hero() {
         </p>
         <div className={styles.stats}>
           <StatCard value="99.5%" label="Availability SLA" />
-          <StatCard value="P95 TTFT" label="SLA-Bound Latency" />
-          <StatCard value="Dedicated" label="GPU Isolation" />
+          <StatCard value="99% Target" label="TTFT Attainment SLA" />
+          <StatCard value="Isolated" label="GPU Isolation" />
         </div>
       </motion.div>
     </section>

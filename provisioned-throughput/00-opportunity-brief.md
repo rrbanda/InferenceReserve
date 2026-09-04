@@ -70,7 +70,7 @@ If we offer customers the ability to reserve a fixed TPM capacity for a specific
 
 **Segment A — Internal teams consuming shared serving (no self-managed GPUs):**
 - Will migrate predictable production inference traffic from the shared pool to PT for guaranteed TTFT and cost predictability
-- Will commit to monthly or annual terms, creating predictable recurring revenue for the platform
+- Will commit to monthly or annual terms, creating predictable recurring chargeback recovery for the platform and demand signals for GPU procurement
 - Value proposition: guaranteed capacity + predictable cost without needing to procure or operate GPU infrastructure
 
 **Segment B — Teams already running private GPU clusters:**
@@ -121,7 +121,7 @@ We believe this is achievable because:
 ## 7. What This Is Not
 
 - This is not a fleet utilisation or idle reduction project. PT is a product with a price, an SLA, and a customer.
-- This is not an internal resource allocation policy. PT may serve internal teams (via chargeback), external tenants, or both — but the product contract is the same in either case: customer commits to TPM, platform delivers the SLA.
+- This is not an internal resource allocation policy. PT is an enterprise-grade internal product serving internal business units via chargeback. The product contract is the same regardless of which team uses it: the team commits to TPM, the platform delivers the SLA. (External tenants are a future Option C scope extension, not the current target.)
 - This brief is not a PRD. Discovery answers Q1–Q8. Design begins only after discovery is complete.
 
 ---

@@ -32,7 +32,7 @@ export default function Architecture() {
             <div className={styles.buildGap}>
               <p className={styles.buildDesc}>
                 The upstream open-source stack provides serving, routing, isolation, and observability.
-                The custom build is the product layer: lifecycle management, auth, sizing, billing, and dashboards.
+                The custom build is the product layer: lifecycle management, auth, sizing, chargeback metering, and dashboards.
               </p>
               <div className={styles.buildBar}>
                 <div className={styles.upstream}>
@@ -65,7 +65,7 @@ export default function Architecture() {
                     <li>PT Auth Service</li>
                     <li>Sizing Calculator</li>
                     <li>PT Catalog</li>
-                    <li>Billing Pipeline</li>
+                    <li>Chargeback Pipeline (Phase 2)</li>
                     <li>Consumer Dashboard</li>
                     <li>Fleet Dashboard</li>
                   </ul>

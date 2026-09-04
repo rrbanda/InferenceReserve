@@ -23,7 +23,7 @@ const sectionComponents: Record<string, React.ReactNode> = {
         <SectionHeader
           title="Sizing Calculator"
           subtitle="Estimate your PT reservation requirements"
-          description="Select a model, set your expected RPM and token sizes, and get an instant estimate of the recommended tier, GPU count, and monthly cost."
+          description="Select a model, set your expected RPM and token sizes, and get an instant estimate of the recommended tier, GPU count, and monthly chargeback rate."
         />
         <SizingCalculator />
       </div>

@@ -102,7 +102,7 @@ export default function ArchDiagram() {
         <Box x={L + 115} y={Y.obs + 12} w={110} h={BH} label="vLLM /metrics" sub="tokens · TTFT" type="upstream" />
         <Box x={L + 240} y={Y.obs + 12} w={95} h={BH} label="Prometheus" type="gateway" />
         <Box x={L + 350} y={Y.obs + 12} w={120} h={BH} label="Grafana" sub="dashboards" type="custom" />
-        <Box x={W - L - 135} y={Y.obs + 12} w={115} h={BH} label="Billing" sub="token aggregation" type="custom" />
+        <Box x={W - L - 135} y={Y.obs + 12} w={115} h={BH} label="Chargeback" sub="token aggregation" type="custom" />
 
         {/* === REQUEST FLOW ARROWS (solid, clean L-shapes) === */}
         {/* Client down to Gateway */}

@@ -22,7 +22,9 @@
 | New hardware for PT growth | Cloud provider adds capacity; we request more | We must plan and order GPU hardware 6+ months ahead |
 | Air-gap / data sovereignty | Not possible — traffic exits premises | Full air-gap capability (OpenShift disconnected install) |
 
-**The single most important consequence:** On-prem PT pricing cannot afford a low break-even utilisation. A cloud PT provider can tolerate 50% pool utilisation and still be profitable (they stop renting idle GPUs). We cannot — at 50% utilisation, we are paying full cost for half of our PT pool with no revenue to show for it.
+**The single most important consequence:** On-prem PT chargeback rates cannot afford a low break-even utilisation. A cloud PT provider can tolerate 50% pool utilisation and still be profitable (they stop renting idle GPUs). We cannot — at 50% utilisation, we are paying full cost for half of our PT pool with no chargeback recovery to show for it.
+
+> **Isolation trade-off note:** This utilisation pressure is compounded by physical node isolation (Phase 1 design). A tenant using 30% of a node's capacity ties up 100% of that node. Google Vertex AI uses logical isolation (scheduling priority, not hardware exclusivity) precisely to avoid this problem. Phase 2 should evaluate logical isolation via InferenceObjective priority + ResourceQuota to improve fleet utilisation while maintaining SLA guarantees.
 
 This drives two product design constraints that cloud PT providers do not face:
 1. **PT must be sold only to customers with demonstrably predictable traffic** — we need their utilisation to stay above 70% on average
@@ -76,9 +78,9 @@ MIG provides hardware-level isolation between partitions — not just process is
 
 ```
 Cloud provider GPU cost: ~$2.20–3.60/hr per H100 (committed, 1-year, varies by provider)
-Revenue from PT (example): $0.40/1k TPM-hr
+Chargeback from PT (example): $0.40/1k TPM-hr
 At 70% pool utilisation:
-  Revenue: covers cost + margin
+  Chargeback: covers cost + margin
   If utilisation drops to 50%: provider releases idle GPUs → cost drops proportionally
   → Provider can sustain lower utilisation without permanent loss
 ```
@@ -88,19 +90,18 @@ At 70% pool utilisation:
 ```
 Our GPU cost: ~$1.46/hr per H100 NVL (fully-loaded, on-prem)
   (= ~$12,750/yr fully-loaded midpoint ÷ 8,760 hrs)
-Revenue from PT (example): $0.30/1k TPM-hr
+Chargeback rate (example): $0.30/1k TPM-hr
 At 70% pool utilisation:
   Cost per 1k TPM: $1.46 × 8 GPUs per node ÷ (150,000 TPM × 70%) × 1,000 = $0.111/1k TPM
-  Revenue: $0.30 / cost $0.111 = ~2.7× cost → ~63% gross margin
+  Chargeback: $0.30 / cost $0.111 = ~2.7× cost → healthy buffer for ops overhead
   
 At 40% pool utilisation:
   Cost per 1k TPM: $0.111 / 0.40 × 0.70 = $0.194/1k TPM  
-  Revenue: $0.30 / cost $0.194 = 1.5× cost → ~35% gross margin
-  → Positive but margin is thin; any throughput estimate variance erodes it
+  Chargeback: $0.30 / cost $0.194 = 1.5× cost → thin buffer; any throughput estimate variance erodes it
 
 At 25% pool utilisation:
   Cost per 1k TPM: $0.311/1k TPM
-  Revenue: $0.30 / cost $0.311 → Revenue < cost → Loss
+  Chargeback: $0.30 / cost $0.311 → Chargeback < cost → Under-recovery
 ```
 
 The on-prem cost advantage (lower $/hr than cloud) is real, but it only materialises at adequate pool utilisation. Below ~55% utilisation at our cost structure, on-prem PT becomes worse economics than cloud PT.

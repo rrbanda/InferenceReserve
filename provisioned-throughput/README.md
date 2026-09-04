@@ -46,6 +46,7 @@ This is the same product pattern as Google Vertex AI PT (GSUs) and Azure OpenAI 
 | 12 | `12-vertex-pt-comparison.md` | Dimension-by-dimension comparison vs Google Vertex AI PT; gap analysis and competitive positioning |
 | 13 | `13-executive-brief.md` | **3-page brief for engineering leadership.** Product features, consumer/producer experience, architecture diagram and component map. |
 | 14 | `14-experience-design.md` | Consumer and producer journey design — step-by-step UX for both personas with implementation detail |
+| 15 | `15-vertex-pt-reference.md` | **Definitive reference.** Complete Google Vertex AI PT knowledge base — GSU mechanics, burndown tables, quota enforcement, SLA, caching, monitoring, competitive comparison. Resolves all open VQ questions. |
 
 ---
 

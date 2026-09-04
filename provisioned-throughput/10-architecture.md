@@ -143,13 +143,21 @@ Estimated complexity: ~800 lines of Go or Python. Stateless; reads from Kubernet
 
 **Spillover Logic**
 
-When a PT tenant's pool returns 429 (TPM exhausted or all replicas at max concurrency), traffic should spill to the shared pool at shared serving rates. Implementation:
+> **Phase 1:** No spillover. Each tenant has dedicated pods with no shared pool fallback. Requests exceeding the PT pool's `max-num-seqs` capacity receive a 429. This is the simplest correct implementation.
 
-- Envoy retry policy: `retry-on: retriable-status-codes` with `retriable_status_codes: [429]`
-- Retry target: the shared InferencePool (different backendRef)
-- Billing: the gateway access log marks spilled requests with a `spillover: true` metadata tag; the billing pipeline charges shared serving rates for these tokens
+> **Phase 2:** Pre-routing spillover via the PT Auth Service. The approach mirrors Google Vertex AI's pre-routing quota check — the routing decision happens BEFORE the request reaches the serving pod, not after a failure.
 
-Alternative: a custom ext-proc filter that intercepts 429 responses and re-routes. More complex but gives finer control over spillover conditions.
+Phase 2 spillover implementation:
+
+1. The PT Auth Service maintains a lightweight per-tenant consumed-TPM counter, updated every second from vLLM Prometheus metrics (`prompt_tokens_total` + `generation_tokens_total`)
+2. On each incoming request, the Auth Service estimates the request's weighted token cost using the tenant's burndown rates and average historical output length
+3. If the estimated cost fits within remaining PT quota for the current enforcement window: route to PT pool (`pool_assignment: pt`)
+4. If the estimated cost exceeds remaining PT quota: route to shared pool (`pool_assignment: shared`) and tag as `request_type: spillover` in dynamic metadata
+5. After request completion, reconcile actual token count against the estimate
+
+This pre-routing approach avoids the latency penalty of retry-based spillover (where the request fails first, then retries to the shared pool) and correctly distinguishes tenant quota exhaustion from infrastructure 429s (vLLM at max concurrency).
+
+Billing: the gateway access log captures `request_type` (dedicated / spillover / shared) from dynamic metadata. The chargeback pipeline charges the flat committed rate for dedicated traffic and the shared serving rate for spillover traffic.
 
 ---
 
@@ -220,9 +228,7 @@ spec:
 
 **Per-tenant InferencePool provisioning** — when a reservation is approved, the Reservation Manager applies a `LLMInferenceService` with a `router` block. KServe's controller then auto-provisions the InferencePool, EPP, and HTTPRoute. No custom provisioning code needed for routing.
 
-**Spillover HTTPRoute** — a secondary backendRef on the HTTPRoute that catches 429s. Not natively supported by Gateway API (which routes before the backend responds). Requires either:
-- Envoy retry policy with alternate cluster (configurable via BackendTrafficPolicy)
-- Or: a custom ext-proc filter in the EPP that detects 429 and re-dispatches
+**Spillover routing (Phase 2)** — the PT Auth Service sets `pool_assignment` in dynamic metadata before the request is routed. The HTTPRoute uses header matching on this metadata to direct traffic to either the PT InferencePool or the shared InferencePool. No retry-based spillover is needed — the routing decision is made pre-request, not post-failure.
 
 ---
 
@@ -416,6 +422,17 @@ Deprovisioning on term expiry or cancellation:
 
 **Key distinction:** this is a provisioning script or GitOps pipeline, not a Kubernetes operator with a reconciliation loop. The infrastructure reconciliation is handled entirely by KServe's `LLMInferenceService` controller and the NVIDIA GPU Operator.
 
+**Kueue and Reservation Manager Coordination**
+
+Kueue manages per-team GPU quotas via ClusterQueue/LocalQueue. The Reservation Manager tracks PT GPU allocations. These must coordinate to prevent double-allocation:
+
+1. The Reservation Manager queries Kueue's `allocatedResources` on the PT ClusterQueue before approving a new reservation
+2. When a reservation is approved, the Reservation Manager creates the tenant namespace with a Kueue LocalQueue pointing to the PT ClusterQueue and a ResourceQuota matching the reservation's GPU count
+3. Kueue's admission control prevents the LLMInferenceService pods from scheduling if the ClusterQueue's total GPU quota is already consumed by other tenants
+4. The PT Capacity Planner reads both the Reservation Manager's committed inventory and Kueue's `allocatedResources` to produce the authoritative fleet capacity view
+
+This ensures that the Reservation Manager (business logic) and Kueue (scheduling enforcement) agree on GPU allocation. The Reservation Manager is the source of truth for commitments; Kueue is the enforcement mechanism that prevents over-scheduling.
+
 **Admission Webhooks** — standard Kubernetes validating webhooks that enforce business rules:
 - `committedTPM` can only increase mid-term (not decrease)
 - `term.end` cannot be shortened (non-cancellable)
@@ -425,7 +442,7 @@ Deprovisioning on term expiry or cancellation:
 - Reads per-request token counts from gateway access logs
 - Applies burndown rate multipliers (output tokens × 4, cached tokens × 0.25)
 - Aggregates per tenant per hour into billing records (PostgreSQL)
-- Monthly invoice generation: committed cost + spillover cost - SLA credits
+- Monthly chargeback report generation: committed chargeback + spillover chargeback - SLA credits
 
 ### 6.3 Sizing Calculator
 
@@ -556,8 +573,8 @@ Components:
 1. **Envoy access log format** — configured to emit per-request token counts from dynamic metadata, including `request_type` (dedicated / spillover / shared) and cache hit status
 2. **Log collector** — routes access logs to the aggregation store (existing Fluentd/Vector or new OTel Collector)
 3. **Aggregation job** — hourly CronJob that reads access logs, applies burndown rate multipliers, sums weighted tokens per tenant, writes to billing store
-4. **Billing store** — PostgreSQL table: `(tenant_id, hour, model, input_tokens, cached_input_tokens, output_tokens, weighted_tpm_consumed, request_type, spillover_tokens, committed_tpm, cost)`
-5. **Invoice generator** — monthly job that computes: committed cost (flat, regardless of usage) + spillover cost (input and output tokens priced separately at shared serving rates) - SLA credits (from Health Monitor breach events)
+4. **Chargeback store** — PostgreSQL table: `(tenant_id, cost_centre, hour, model, input_tokens, cached_input_tokens, output_tokens, weighted_tpm_consumed, request_type, spillover_tokens, committed_tpm, chargeback_amount)`
+5. **Monthly chargeback report generator** — monthly job that computes per tenant/cost centre: committed chargeback (flat rate: committed TPM x hours, regardless of usage) + spillover chargeback (input and output tokens at shared serving rates) - SLA credit deductions (from Health Monitor breach events). Output: chargeback report per cost centre for Finance. This is internal cost allocation, not commercial invoicing.
 6. **Burndown rate configuration** — per-model burndown rates stored in the throughput profile registry. Default: output = 4.0x input, cached = 0.25x input. Customisable per reservation via `spec.burndownRates` in the ProvisionedThroughput CRD.
 
 **PT Health Monitor / SLA Watchdog**
@@ -568,7 +585,7 @@ A lightweight controller or CronJob that watches PT-specific health signals and 
 |---|---|---|
 | DCGM ECC error count | > threshold on PT node | Alert + flag node for drain; reschedule to N+1 spare |
 | DCGM GPU temperature | > 85°C sustained on PT node | Alert + investigate thermal throttling |
-| vLLM TTFT P95 | > SLA threshold for 5 minutes (measured only on within-PT requests, not spillover) | Alert; log SLA credit event in billing store; credit amount per `spec.sla.creditPolicy` |
+| vLLM TTFT target attainment | <99% of within-PT requests meeting `ttftTargetMs` over rolling 24-hour window | Alert; log SLA credit event in chargeback store; credit amount per `spec.sla.creditPolicy`. Note: measured only on within-PT requests (not spillover). |
 | vLLM queue depth | > 0 sustained for 10 minutes | Alert: PT pool may be undersized |
 | vLLM `gpu_cache_usage_perc` | > 95% sustained | Alert: KV cache saturation; TTFT degradation imminent |
 | Node unreachable | PT node NotReady for 2 minutes | Evict PT pods; reschedule to spare; page on-call |
@@ -579,8 +596,8 @@ A lightweight controller or CronJob that watches PT-specific health signals and 
 
 | Phase | What the Customer Gets | Upstream Components (Use) | Custom Build |
 |---|---|---|---|
-| **Phase 1** | Full-GPU PT on H100 NVL / H200 NVL; dedicated node pool; TTFT SLA; fixed committed price | LLMInferenceService (KServe v0.17), vLLM, InferencePool + EPP + HTTPRoute (auto-provisioned by KServe), NVIDIA GPU Operator, Kueue, DCGM, Prometheus | Reservation Manager, Auth Service, Sizing Calculator, Admission Webhooks, Dashboard Templates, Billing Pipeline |
-| **Phase 2** | Request-level TPM enforcement; spillover to shared pool at shared serving rates; fine-grained metering | Envoy AI Gateway BackendTrafficPolicy, ext_authz, InferenceObjective (alpha), vLLM per-request metrics | Spillover controller, per-tenant TPM budget injection via auth service, chargeback reconciliation logic |
+| **Phase 1** | Full-GPU PT on H100 NVL / H200 NVL; dedicated node pool; latency target attainment SLA; flat committed chargeback rate | LLMInferenceService (KServe v0.17), vLLM, InferencePool + EPP + HTTPRoute (auto-provisioned by KServe), NVIDIA GPU Operator, Kueue, DCGM, Prometheus | Reservation Manager, Auth Service, Sizing Calculator, Admission Webhooks, Dashboard Templates, Basic Chargeback Metering (flat rate: committed TPM x hours per tenant) |
+| **Phase 2** | Request-level TPM enforcement; pre-routing spillover to shared pool; burndown-rate chargeback metering | Envoy AI Gateway BackendTrafficPolicy, ext_authz, InferenceObjective (alpha), vLLM per-request metrics | Pre-routing quota check in Auth Service, per-tenant TPM budget injection, Chargeback Pipeline (per-request token aggregation with burndown rates, monthly chargeback report per cost centre) |
 | **Phase 3** | MIG sub-GPU PT tiers (Micro, Small, Medium) for embedding models and small LLMs | MIG profiles (operational on A100), NVIDIA GPU Operator, DCGM MIG-instance metrics | PT Operator extension for MIG tier management, MIG-aware sizing profiles, MIG reconfiguration runbook |
 | **Phase 4** | PT for 70B+ models via llm-d disaggregated prefill/decode | llm-d disaggregation, NIXL KV transfer, LeaderWorkerSet, LLMInferenceService `worker` block | Two-dimensional reservation model (prefill + decode capacity), RDMA fabric validation and procurement, prefill/decode pool sizing profiles |
 

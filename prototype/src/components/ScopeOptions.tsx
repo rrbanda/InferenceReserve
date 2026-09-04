@@ -16,7 +16,7 @@ const options = [
     title: 'Option B',
     timeline: '3–4 months',
     description:
-      'Full PT product: CRD-driven lifecycle, llm-d cache-aware routing, spillover, per-tenant dashboards, billing pipeline, sizing calculator. Production-ready for first tenants.',
+      'Full internal PT product: CRD-driven lifecycle, llm-d cache-aware routing, per-tenant dashboards, chargeback metering, sizing calculator. Production-ready for first internal tenants. Spillover and burndown-rate chargeback in Phase 2.',
     effort: '4 engineers · Moderate integration risk',
     highlighted: true,
   },
@@ -25,7 +25,7 @@ const options = [
     title: 'Option C',
     timeline: '6–9 months',
     description:
-      'Enterprise scale: multi-region, LoRA-aware routing, InferenceObjective autoscaling, self-service portal, real-time billing, SLA credits automation.',
+      'Enterprise scale: logical isolation via InferenceObjective, LoRA-aware routing, self-service portal, burndown-rate chargeback pipeline, SLA credits automation. Future: external customer support.',
     effort: '6+ engineers · Higher integration risk',
     highlighted: false,
   },

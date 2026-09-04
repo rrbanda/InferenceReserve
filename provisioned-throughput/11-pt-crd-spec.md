@@ -106,14 +106,18 @@ spec:
                 sla:
                   type: object
                   properties:
-                    maxTTFT_P95_ms:
+                    ttftTargetMs:
                       type: integer
                       default: 500
-                      description: "Maximum P95 TTFT in milliseconds. SLA commitment. Measured only on requests within committed TPM (not spillover)."
+                      description: "TTFT target in milliseconds for this model and tier. Not a hard P95 guarantee — used with ttftTargetAttainment to define the latency SLA. The target is model-specific and derived from benchmarks."
+                    ttftTargetAttainment:
+                      type: string
+                      default: "99%"
+                      description: "Percentage of requests within committed TPM that must complete with TTFT at or below ttftTargetMs, measured over rolling 24-hour windows. SLA credits apply when attainment drops below this threshold. This 'latency target attainment' model matches Vertex AI's approach — no cloud provider publishes a fixed TTFT guarantee because TTFT depends on prompt length, batch size, and KV cache state."
                     availabilityTarget:
                       type: string
                       default: "99.5%"
-                      description: "Uptime SLA target. Within-PT-quota errors that would be 429 are treated as 5XX and count toward the SLA error rate. Over-PT spillover 429s do not count. Default 99.5% matches market standard (Vertex AI)."
+                      description: "Availability SLA target. Within-PT-quota errors that would be 429 are treated as 5XX and count toward the SLA error rate. Over-PT spillover 429s do not count. Default 99.5% matches market standard (Vertex AI). On-prem hardware failure risk makes 99.9% unrealistic without N+2 spares."
                     creditPolicy:
                       type: object
                       description: "Financial credit terms for SLA breaches. Credits are applied to the next billing period."
@@ -138,9 +142,9 @@ spec:
                       default: ["planned-maintenance", "customer-caused-overages", "force-majeure"]
                 overflow:
                   type: string
-                  enum: ["spillover-to-shared", "hard-reject", "queue"]
+                  enum: ["spillover-to-shared", "hard-reject"]
                   default: "spillover-to-shared"
-                  description: "Behaviour when traffic exceeds committed TPM. 'spillover-to-shared' routes overflow to the shared serving pool at shared serving rates."
+                  description: "Behaviour when traffic exceeds committed TPM. 'spillover-to-shared' routes overflow to the shared serving pool at shared serving rates (Phase 2; Phase 1 returns 429). 'hard-reject' returns 429 with no spillover. Queuing is not offered — it adds latency without resolving the capacity problem."
                 vllmOverrides:
                   type: object
                   description: "Optional vLLM parameter overrides for this reservation."
@@ -258,7 +262,8 @@ spec:
     end: "2027-10-01"
     autoRenew: true
   sla:
-    maxTTFT_P95_ms: 400
+    ttftTargetMs: 400
+    ttftTargetAttainment: "99%"
     availabilityTarget: "99.5%"
     creditPolicy:
       creditPercentagePerBreach: 10

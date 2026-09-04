@@ -72,17 +72,17 @@ Everything in B, plus competitive pricing with burndown rates (input/output/cach
 
 - Effort: 6-9 months through Phase 2
 - Requires: Legal, Finance, GTM involvement beyond engineering
-- Outcome: GPU fleet generates measurable revenue or justified chargeback; competitive with cloud PT for air-gapped and data-sovereignty use cases
+- Outcome: GPU fleet costs are recovered through justified chargeback to consuming business units; competitive with self-managed GPU infrastructure for internal teams with air-gapped and data-sovereignty requirements
 
 ---
 
 ## What We Need From This Conversation
 
-1. **Which scope fits what you are looking for?** A, B, or C — or something different. This determines the size of the investment and who needs to be involved.
+1. **Scope is Option B: enterprise-grade internal PT product with chargeback.** Full SLA, dashboards, sizing calculator, chargeback billing to internal business units. Not commercial pricing for external customers (that would be Option C, a future scope extension).
 
-2. **Who is the customer?** Internal teams only, or also external tenants / regulated-industry customers who cannot use cloud inference? This determines whether we need billing and commercial terms or just chargeback.
+2. **The customer is internal business units.** Teams within the org that need guaranteed LLM inference throughput. Segment D (regulated industry teams with compliance requirements) are internal teams with stricter data sovereignty needs — not external customers.
 
-3. **What is the timeline expectation?** Are we solving a problem teams have today (Option A, weeks), or building a product for next year's capacity planning (Option B/C, months)?
+3. **What is the timeline expectation?** Are we solving a problem teams have today (Option A, weeks), or building an enterprise-grade platform product for capacity planning and SLA-backed chargeback (Option B, months)?
 
 ---
 

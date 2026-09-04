@@ -12,19 +12,19 @@ Provisioned Throughput (PT) reserves a fixed tokens-per-minute capacity for a sp
 
 | Dimension | Shared Serving (today) | Provisioned Throughput |
 |---|---|---|
-| Isolation | None. All teams share the same GPU pool. | Dedicated GPU nodes per reservation. Physically isolated via node taints. |
-| TTFT guarantee | Best-effort. Spikes to 4s+ under contention. | SLA-bound. P95 TTFT committed per reservation (e.g., 500ms). |
+| Isolation | None. All teams share the same GPU pool. | Phase 1: dedicated GPU nodes per reservation, physically isolated via node taints. Phase 2: evaluates logical isolation (scheduling priority via InferenceObjective) for better fleet utilisation. |
+| TTFT guarantee | Best-effort. Spikes to 4s+ under contention. | SLA-bound. Latency target attainment: 99% of requests within committed TPM meet the published TTFT target for the model and tier (e.g., 500ms). |
 | Capacity | Variable. Depends on cluster load. | Fixed. Reserved TPM always available up to committed level. |
 | Routing | Round-robin across replicas. | Intelligent. llm-d EPP routes to the pod with warmest KV cache, lowest queue. |
 | Cost model | Per-team chargeback on usage (if tracked). | Flat committed rate per TPM-hour. Spillover billed separately. |
-| SLA | None. | 99.5% availability. Financial credits on breach. |
+| SLA | None. | 99.5% availability. 99% latency target attainment. SLA credits on breach. |
 
 ### What a Customer Gets
 
 | Feature | How It Works |
 |---|---|
-| Guaranteed TPM with TTFT SLA | Dedicated vLLM replicas with `minReplicas == maxReplicas`. Always warm. |
-| Physical GPU isolation | PT nodes tainted `dedicated=provisioned-throughput:NoSchedule`. |
+| Guaranteed TPM with latency target attainment SLA | Dedicated vLLM replicas with `minReplicas == maxReplicas`. Always warm. 99% of requests within committed TPM meet the published TTFT target. |
+| GPU isolation | Phase 1: physical — PT nodes tainted `dedicated=provisioned-throughput:NoSchedule`. Phase 2: evaluates logical isolation via InferenceObjective priority for better fleet utilisation. Note: Google Vertex AI uses logical isolation (scheduling priority, not hardware exclusivity). |
 | Cache-aware intelligent routing | llm-d EPP scores each pod by prefix cache locality, KV cache occupancy, queue depth. |
 | Spillover to shared pool | Overflow routes to the shared pool. No hard 429 unless the customer opts in. |
 | Per-request routing control | `X-PT-Request-Type: dedicated` (PT only) or `shared` (bypass PT for dev/test). |
@@ -223,7 +223,7 @@ graph TB
 | **PT Auth Service** | **Custom build** | **Phase 1** | **Tenant identity, TPM budget, request-type routing** |
 | **Sizing Calculator** | **Custom build** | **Phase 1** | **Workload inputs to PT tier recommendation** |
 | **PT Catalog** | **Custom build** | **Phase 1** | **Model registry with throughput profiles and pricing** |
-| **Billing Pipeline** | **Custom build** | **Phase 2** | **Per-request token aggregation, burndown rates, SLA credits** |
+| **Chargeback Pipeline** | **Custom build** | **Phase 2** | **Per-request token aggregation with burndown rates, monthly chargeback report per cost centre, SLA credit deductions** |
 | **Consumer Dashboard** | **Custom build** | **Phase 1** | **Per-tenant Grafana: utilisation, TTFT, SLA, spillover** |
 | **Fleet Dashboard** | **Custom build** | **Phase 1** | **Producer view: all reservations, capacity, health** |
 

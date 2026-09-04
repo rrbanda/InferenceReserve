@@ -35,16 +35,14 @@ Vertex PT is a fixed-cost, fixed-term subscription that reserves throughput for 
 
 | Dimension | Vertex PT | Our PT | Verdict |
 |---|---|---|---|
-| Unit name | GSU (Generative AI Scale Unit) | TPM (tokens per minute) | Gap |
+| Unit name | GSU (Generative AI Scale Unit) | TPM (tokens per minute) with burndown rates | Aligned |
 | Unit granularity | Per-second throughput | Per-minute throughput | Minor — TPM is acceptable for on-prem |
-| Input/output weighting | Burndown rates: output = 5x input; cached = 0.1x | TPM treats all tokens equally | **Gap: no differential token costing** |
-| Model-specific sizing | Each model has different tokens/sec per GSU | CRD has a flat `committedTPM` field | **Gap: no model-specific throughput profiles in CRD** |
+| Input/output weighting | Burndown rates: output = 5x input; cached = 0.1x | Burndown rates in CRD: output = 4x input (default); cached = 0.25x input (default) | Aligned — defaults set; exact multipliers pending benchmarks. Our 4x output (vs Vertex 5x) and 0.25x cached (vs Vertex 0.1x) are more conservative starting points. |
+| Model-specific sizing | Each model has different tokens/sec per GSU | CRD `committedTPM` is weighted TPM (burndown-adjusted). Per-model throughput profiles define the mapping. | Aligned — throughput profiles created per model from benchmarks |
 
-**Finding:** Our flat TPM is simpler than Vertex's GSU with burndown rates. This is acceptable for Phase 1 (one model per reservation), but becomes a problem when output tokens are 3-5x more expensive to generate than input tokens (decode is memory-bound), context caching reduces the cost of cached input tokens, and customers serve multiple modalities.
+**Finding:** The CRD spec (`11-pt-crd-spec.md`) already includes `burndownRates` with `outputTokenMultiplier` (default 4.0) and `cachedInputTokenMultiplier` (default 0.25). The `committedTPM` field is defined as weighted TPM — output tokens count at the output multiplier. Phase 1 chargeback uses the flat committed rate (committed TPM x hours). Phase 2 adds per-request token aggregation with burndown rate application for detailed chargeback reporting.
 
-**Action:** Add burndown rate concept to the PT pricing model. At minimum, differentiate input vs output token costs in the billing pipeline. Consider whether our CRD should express commitment in an abstract unit rather than raw TPM.
-
-**Where to implement:** Update `committedTPM` in `11-pt-crd-spec.md` to optionally support weighted token accounting. Update billing pipeline in `10-architecture.md` to track input and output tokens separately.
+**Remaining action:** Validate the exact output token multiplier (currently 4x default) and cached token multiplier (currently 0.25x default) against Engineering benchmarks measuring the actual prefill vs decode cost ratio on our H100 NVL hardware. Vertex uses 5x output and 0.1x cached — our defaults are more conservative.
 
 ---
 
@@ -89,15 +87,15 @@ Vertex PT is a fixed-cost, fixed-term subscription that reserves throughput for 
 
 | Dimension | Vertex PT | Our PT | Verdict |
 |---|---|---|---|
-| Availability SLA | 99.5% uptime | `sla.availabilityTarget: 99.9%` | We promise more — validate achievable on-prem |
-| Latency SLA | 99% latency target attainment with financial credits | `sla.maxTTFT_P95_ms: 500` | Aligned but different metric |
+| Availability SLA | 99.5% uptime | `sla.availabilityTarget: 99.5%` | Aligned — matches market standard. On-prem hardware failure risk (no silent cloud failover) makes 99.9% unrealistic without N+2 spares; 99.5% is achievable with N+1. |
+| Latency SLA | 99% latency target attainment with financial credits | `sla.ttftTargetAttainment: 99%` with per-model target | Aligned — using latency target attainment model (99% of requests within committed TPM meet the published TTFT target) rather than a fixed P95 TTFT guarantee, matching Vertex's approach |
 | SLA credits | Financial credits (% of monthly bill) applied to future use | Not addressed | **Gap: no SLA credit mechanism** |
 | SLA exclusions | Planned maintenance, customer-caused overages | Not addressed | **Gap: no exclusion definitions** |
 | 429 vs 5XX treatment | Within-PT 429s become 5XX (count toward SLA). Over-PT 429s are spillover (do not count). | Health Monitor tracks TTFT breaches | **Gap: no within-PT vs over-PT distinction** |
 
 **Finding:** Vertex's SLA mechanic is precise: within committed capacity, what would normally be a 429 becomes a 5XX that counts against the SLA (Google is accountable). Over committed capacity, 429s are spillover and do not count (customer chose to exceed). Our architecture needs this same distinction — the PT Auth Service and billing pipeline must tag requests as "within commitment" vs "overflow" for SLA accounting.
 
-**Action:** Design the SLA credit mechanism. Define planned maintenance exclusions. Add within-PT vs over-PT distinction to monitoring and billing. Consider lowering our default availability target from 99.9% to 99.5% to match market expectations — or validate that on-prem N+1 spare architecture can support 99.9%.
+**Action:** Design the SLA credit mechanism. Define planned maintenance exclusions. Add within-PT vs over-PT distinction to monitoring and billing. Default availability target is 99.5%, matching market standard (Vertex AI). On-prem hardware failure risk makes 99.9% unrealistic without N+2 spares per pool — not justified for Phase 1.
 
 **Where to implement:** SLA credit fields in `11-pt-crd-spec.md`. SLA exclusion definitions in the PT contract terms (new document). Within-PT tagging in the PT Health Monitor design in `10-architecture.md`.
 
@@ -155,7 +153,7 @@ Each gap is classified by whether it is a genuine on-prem structural constraint 
 | Multi-model PT management | Single console for Gemini, Claude, Llama, DeepSeek | CRD is model-specific; no consolidated view | **Product design choice** — no technical barrier | Build a Grafana dashboard that queries all `ProvisionedThroughput` CRs across models for a tenant. Pure dashboard work. | Phase 2 |
 | Model swap within commitment | Reassign GSUs to new model version mid-term | CRD binds to specific model; change = new reservation | **Harder on-prem, but feasible** — swapping models requires loading new weights (minutes of downtime per replica for 70B). Cloud abstracts this away. | Reservation Manager orchestrates rolling swap: spin up new LLMInferenceService with new model, wait until warm, cut over traffic via HTTPRoute, tear down old. Add `spec.modelSwap` field to CRD. | Phase 3 |
 | Priority serving tier | 1.8x standard rate, priority queue between PT and standard shared | Two tiers only (PT and shared) | **Product design choice** — `InferenceObjective` already supports priority levels. No technical barrier. | Define three `InferenceObjective` resources: PT (priority=1), premium shared (priority=2), standard shared (priority=3). Pricing decision, not engineering. | Phase 2 |
-| 1-week commitment terms | Available for select models for short spikes | CRD has no minimum term constraint (implicitly supported) | **On-prem friction** — 1-week terms mean tainting/untainting nodes every week. Node assignment churn and GPU idle time between tenants is real operational overhead. Short terms are economically riskier because we cannot release idle hardware. | Evaluate whether the operational overhead of weekly node cycling is justified. May require a "shared PT pool" model (multiple short-term tenants on same PT nodes) rather than dedicated nodes per tenant. | Phase 2 |
+| 1-week commitment terms | Available for select models for short spikes | **Not offered.** Minimum 1 month. | **On-prem structural constraint** — the GPU exists at full CapEx cost before and after a 1-week term. Cloud providers instantly reallocate idle GPUs; we cannot. Node taint/untaint churn makes 1-week terms a net cost. **Refuted in PM-13.** Minimum commitment is 1 month, matching Azure PTU. | N/A — not offered. | N/A |
 | Proactive capacity scheduling | Schedule change orders 2 weeks ahead | CRD supports future `term.start` but no scheduled increase mechanism | **Product design choice** — no technical barrier. The Reservation Manager could process a `spec.scheduledChanges` array at the specified time. | Add `spec.scheduledChanges` field to CRD: array of `{date, newCommittedTPM}` entries. Reservation Manager applies changes at the scheduled time. | Phase 2 |
 | No code change for activation | Auto-activates for project/model/region | Requires `x-tenant-id` header on every request | **On-prem structural friction** — Vertex controls routing per GCP project. On-prem, multiple tenants share a cluster, so some tenant identification is unavoidable. | Reduce friction: resolve tenant identity from source namespace or client certificate (Istio mTLS) rather than requiring a header. If a request originates from `pt-tenant-a` namespace, auto-route to that tenant's PT pool without any header. Requires the PT Auth Service to check source IP/namespace. | Phase 2 |
 
@@ -166,7 +164,7 @@ Each gap is classified by whether it is a genuine on-prem structural constraint 
 | Advantage | Detail | Why It Matters |
 |---|---|---|
 | Infrastructure transparency | GPU utilisation, KV cache metrics, NVLink bandwidth exposed to customer | Platform teams want to see hardware health, not just token counts |
-| Physical isolation guarantee | Dedicated PT nodes with taints + affinity. Hardware-level separation. | Vertex's isolation is opaque — may be scheduling priority, not physical separation |
+| Physical isolation (Phase 1) | Phase 1: dedicated PT nodes with taints + affinity. Hardware-level separation. Phase 2: evaluates logical isolation (InferenceObjective priority) for better fleet utilisation. | Vertex uses logical isolation (scheduling priority, not hardware exclusivity). Our Phase 1 physical isolation is stronger but reduces fleet utilisation — a deliberate trade-off for simplicity and SLA confidence. |
 | TTFT SLA commitment | Specific P95 TTFT bound (e.g., 500ms) | Vertex has a latency target attainment objective but does not publish per-model TTFT guarantees |
 | Intelligent routing visibility | llm-d EPP with prefix-cache and KV-cache-aware routing is visible and configurable | Vertex's routing is a black box; customers cannot tune or inspect it |
 | Data sovereignty | Air-gapped OpenShift. Data never leaves the datacenter. | Vertex PT requires cloud API calls. Regulated industries cannot use cloud PT. |

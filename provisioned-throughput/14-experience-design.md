@@ -149,7 +149,8 @@ spec:
     end: "2027-11-01"
     autoRenew: true
   sla:
-    maxTTFT_P95_ms: 500
+    ttftTargetMs: 500
+    ttftTargetAttainment: "99%"
   overflow: spillover-to-shared
 ```
 
@@ -368,7 +369,7 @@ Monthly reports generated from the billing pipeline:
 | Report | Audience | Content |
 |---|---|---|
 | Tenant utilisation report | Consumer | Committed TPM, consumed TPM (weighted), utilisation %, spillover %, TTFT compliance |
-| Fleet utilisation report | Platform leadership | Total PT capacity, aggregate utilisation, revenue/chargeback by tenant, SLA compliance |
+| Fleet utilisation report | Platform leadership | Total PT capacity, aggregate utilisation, chargeback recovery by tenant, SLA compliance |
 | Right-sizing recommendations | Consumer + platform team | Tenants at <50% utilisation: "consider downsizing at renewal." Tenants at >90%: "consider increasing." |
 | SLA compliance report | Platform leadership | Breaches per tenant, credits issued, root causes |
 

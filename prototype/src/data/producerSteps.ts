@@ -13,7 +13,7 @@ export const producerSteps: ProducerStep[] = [
     title: 'Catalog Model',
     subtitle: 'Benchmark and price',
     description:
-      'Run standardised benchmarks for each model on target GPU types, create a throughput profile documenting max tokens/sec at utilisation thresholds, and set per-tier pricing in the PT catalog.',
+      'Run standardised benchmarks for each model on target GPU types, create a throughput profile documenting max tokens/sec at utilisation thresholds, and set per-tier chargeback rates in the PT catalog.',
     codeExample: `apiVersion: inferencereserve.io/v1alpha1
 kind: ThroughputProfile
 metadata:
@@ -29,8 +29,8 @@ spec:
       tokensPerSec: 2500
     - utilisation: 90%
       tokensPerSec: 1800
-  pricing:
-    costPer1kTPMHour: 0.30
+  chargeback:
+    chargebackPer1kTPMHour: 0.30
     currency: USD`,
     codeLabel: 'YAML',
   },
@@ -102,7 +102,7 @@ llama70b-epp-0              gpu-node-19    Running    # auto-provisioned by KSer
     title: 'Report',
     subtitle: 'Generate compliance reports',
     description:
-      'Generate utilisation reports, SLA compliance summaries, and billing breakdowns per tenant. Reports feed into chargeback systems and executive dashboards for cost attribution and capacity planning.',
+      'Generate utilisation reports, SLA compliance summaries, and chargeback breakdowns per tenant and cost centre. Reports feed into finance systems and executive dashboards for cost attribution and capacity planning.',
     codeExample: `# Monthly report generation
 $ ptctl report generate --month=2025-06 --format=json
 
@@ -117,11 +117,11 @@ $ ptctl report generate --month=2025-06 --format=json
       "sla_availability": "99.81%",
       "sla_ttft_p95": "398ms",
       "sla_status": "MEETING",
-      "total_cost": "$16,038.00"
+      "monthly_chargeback": "$16,038.00"
     }
   ],
   "fleet_utilisation": "62.3%",
-  "total_revenue": "$48,720.00"
+  "total_chargeback_recovery": "$48,720.00"
 }`,
     codeLabel: 'JSON',
   },

@@ -25,7 +25,7 @@ export const components: ArchComponent[] = [
     name: 'vLLM',
     upstream: 'vllm-project',
     status: 'Production',
-    role: 'LLM serving engine. Continuous batching, PagedAttention, prefix caching, per-request metrics for billing.',
+    role: 'LLM serving engine. Continuous batching, PagedAttention, prefix caching, per-request metrics for chargeback metering.',
     isCustom: false,
   },
   {
@@ -85,10 +85,10 @@ export const components: ArchComponent[] = [
     isCustom: true,
   },
   {
-    name: 'Billing Pipeline',
+    name: 'Chargeback Pipeline',
     upstream: 'Custom build',
-    status: 'To build',
-    role: 'Aggregates per-request token counts, applies burndown rates, generates chargeback reports.',
+    status: 'To build (Phase 2)',
+    role: 'Aggregates per-request token counts, applies burndown rates, generates monthly chargeback reports per cost centre. Phase 1 uses flat committed rate.',
     isCustom: true,
   },
   {

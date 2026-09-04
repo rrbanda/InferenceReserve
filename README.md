@@ -83,6 +83,7 @@ All infrastructure is upstream. The custom build is a thin business layer.
 | [Architecture](provisioned-throughput/10-architecture.md) | 6-layer design with upstream attribution and build-gap analysis |
 | [CRD Specification](provisioned-throughput/11-pt-crd-spec.md) | ProvisionedThroughput CRD, provisioning flow, admission webhooks |
 | [Vertex PT Comparison](provisioned-throughput/12-vertex-pt-comparison.md) | Dimension-by-dimension review — gaps, strengths, competitive positioning |
+| [Vertex PT Reference](provisioned-throughput/15-vertex-pt-reference.md) | Complete Google PT knowledge base — GSU mechanics, burndown tables, SLA, caching, monitoring |
 | [Experience Design](provisioned-throughput/14-experience-design.md) | Consumer and producer journey — step-by-step UX |
 
 ## Phase Map

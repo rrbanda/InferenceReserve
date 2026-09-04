@@ -13,9 +13,9 @@ export const consumerSteps: ConsumerStep[] = [
     title: 'Discover',
     subtitle: 'Browse the PT catalog',
     description:
-      'Explore the Provisioned Throughput catalog to view eligible models, available tiers, throughput profiles, and transparent pricing. The catalog is self-service and always reflects real-time fleet capacity.',
+      'Explore the Provisioned Throughput catalog to view eligible models, available tiers, throughput profiles, and chargeback rates. The catalog is self-service and always reflects real-time fleet capacity.',
     codeExample: `kubectl get ptcatalog -o wide
-NAME            MODEL           GPU-TYPE    TIERS       MIN-TPM    COST/1K-TPM-HR
+NAME            MODEL           GPU-TYPE    TIERS       MIN-TPM    RATE/1K-TPM-HR
 llama3-70b      meta/llama3-70b h100-nvl    S,M,L,XL   10000      $0.30
 llama3-8b       meta/llama3-8b  h100-nvl    S,M,L       5000      $0.15
 mistral-7b      mistralai/7b    h100-nvl    S,M          5000      $0.12
@@ -27,7 +27,7 @@ embedding-v2    internal/emb-v2 a100-mig    S,M         50000      $0.02`,
     title: 'Size',
     subtitle: 'Run the sizing calculator',
     description:
-      'Input your model, requests per minute, and average token counts into the sizing calculator. It returns a recommended tier, GPU count, committed TPM (with burndown rates applied), and estimated monthly cost.',
+      'Input your model, requests per minute, and average token counts into the sizing calculator. It returns a recommended tier, GPU count, committed TPM (with burndown rates applied), and estimated monthly chargeback.',
     codeExample: `# Sizing API call
 POST /api/v1/sizing
 {
@@ -42,7 +42,7 @@ POST /api/v1/sizing
   "recommended_tier": "M",
   "gpus_required": 16,
   "committed_tpm": 75000,
-  "estimated_monthly_cost": "$16,200"
+  "estimated_monthly_chargeback": "$16,200"
 }`,
     codeLabel: 'HTTP',
   },
@@ -62,9 +62,10 @@ spec:
   tier: M
   committedTPM: 75000
   sla:
-    ttftP95Ms: 500
-    availabilityPercent: 99.5
-  billing:
+    ttftTargetMs: 500
+    ttftTargetAttainment: "99%"
+    availabilityTarget: "99.5%"
+  chargeback:
     costCenter: CC-4422
     approver: platform-lead@corp.com`,
     codeLabel: 'YAML',
@@ -160,7 +161,7 @@ avg(DCGM_FI_DEV_GPU_UTIL{node=~"pt-team-alpha.*"})`,
     title: 'Manage',
     subtitle: 'Scale, alert, and optimise',
     description:
-      'Increase committed TPM with a CR patch, view SLA compliance status, receive alerts when utilisation approaches capacity, and review billing summaries — all through standard Kubernetes tooling.',
+      'Increase committed TPM with a CR patch, view SLA compliance status, receive alerts when utilisation approaches capacity, and review chargeback summaries — all through standard Kubernetes tooling.',
     codeExample: `# Scale up TPM
 kubectl patch pt team-alpha-llama70b --type merge -p '
   spec:
@@ -172,6 +173,7 @@ kubectl patch pt team-alpha-llama70b --type merge -p '
 kubectl get pt team-alpha-llama70b -o jsonpath='{.status.sla}'
 {
   "currentAvailability": "99.72%",
+  "ttftTargetAttainment": "99.4%",
   "ttftP95": "412ms",
   "slaStatus": "MEETING",
   "lastViolation": null

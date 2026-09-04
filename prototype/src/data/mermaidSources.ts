@@ -27,7 +27,7 @@ export const architectureDiagram = `graph TB
     vLLM_M["vLLM /metrics"]
     Prom[Prometheus]
     Graf[Grafana Dashboards]
-    Bill[Billing Pipeline]
+    Bill[Chargeback Pipeline]
   end
   Client --> GW
   GW --> Auth
@@ -39,13 +39,12 @@ export const architectureDiagram = `graph TB
   LLMIS -.-> vLLM
   vLLM --> NS
   NS --> Nodes
-  Operator -.-> CRD
-  Operator -.-> NS
-  Operator -.-> LLMIS
-  Operator -.-> Nodes
-  Operator -.-> IP_PT
-  Operator -.-> HR
-  Operator -.-> Graf
+  ResMgr -.-> CRD
+  ResMgr -.-> NS
+  ResMgr -.->|"applies YAML"| LLMIS
+  LLMIS -.->|"auto-creates"| IP_PT
+  LLMIS -.->|"auto-creates"| HR
+  ResMgr -.-> Graf
   DCGM --> Prom
   vLLM_M --> Prom
   Prom --> Graf

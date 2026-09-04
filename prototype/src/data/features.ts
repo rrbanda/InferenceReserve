@@ -7,15 +7,15 @@ export interface Feature {
 export const features: Feature[] = [
   {
     id: 1,
-    title: 'Guaranteed TPM with TTFT SLA',
+    title: 'Guaranteed TPM with Latency Target Attainment SLA',
     description:
-      'Dedicated vLLM replicas are always warm, delivering contractually guaranteed tokens-per-minute throughput with bound time-to-first-token latency.',
+      'Dedicated vLLM replicas are always warm, delivering guaranteed tokens-per-minute throughput. 99% of requests within committed TPM meet the published TTFT target for the model and tier.',
   },
   {
     id: 2,
-    title: 'Physical GPU Isolation',
+    title: 'GPU Isolation',
     description:
-      'PT nodes are tainted so no shared workloads can land on provisioned hardware. Your GPUs run your models — nothing else.',
+      'Phase 1: physical isolation via node taints — no shared workloads on PT hardware. Phase 2: evaluates logical isolation via InferenceObjective priority for better fleet utilisation.',
   },
   {
     id: 3,
@@ -27,7 +27,7 @@ export const features: Feature[] = [
     id: 4,
     title: 'Spillover to Shared Pool',
     description:
-      'Overflow traffic routes transparently to the shared serving pool. No hard 429 errors unless the tenant explicitly opts in to strict mode.',
+      'Phase 1: dedicated pods only, 429 on overflow. Phase 2: pre-routing quota check spills overflow to the shared pool transparently. Tenants can opt into strict mode (dedicated only) via header.',
   },
   {
     id: 5,

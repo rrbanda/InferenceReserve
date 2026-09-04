@@ -114,7 +114,7 @@ export default function SizingCalculator() {
         </div>
 
         <div className={styles.resultRow}>
-          <span className={styles.resultLabel}>Estimated Monthly Cost</span>
+          <span className={styles.resultLabel}>Est. Monthly Chargeback</span>
           <span className={styles.costValue}>{formatCurrency(result.monthlyCost)}</span>
         </div>
       </div>

@@ -9,12 +9,12 @@ const rows = [
   {
     dimension: 'Latency',
     shared: 'Variable, depends on cluster load',
-    pt: 'P95 TTFT bound (e.g. ≤500 ms)',
+    pt: 'Latency target attainment: 99% of requests meet TTFT target (e.g. ≤500 ms)',
   },
   {
     dimension: 'GPU Isolation',
     shared: 'Multi-tenant, shared nodes',
-    pt: 'Dedicated, tainted nodes — physical isolation',
+    pt: 'Phase 1: dedicated tainted nodes. Phase 2: evaluates logical isolation for better fleet utilisation.',
   },
   {
     dimension: 'Routing',
@@ -24,7 +24,7 @@ const rows = [
   {
     dimension: 'Overflow Handling',
     shared: 'HTTP 429 rate limiting',
-    pt: 'Transparent spillover to shared pool',
+    pt: 'Phase 1: 429 on overflow. Phase 2: pre-routing spillover to shared pool.',
   },
   {
     dimension: 'Observability',

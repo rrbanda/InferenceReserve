@@ -48,8 +48,9 @@
 | TF-7 | llm-d EPP (Endpoint Picker) correctly routes requests using prefix-cache-scorer and kv-cache-utilization-scorer when each PT tenant has a separate InferencePool | Open | Engineering test with 2 tenants |
 | TF-8 | vLLM `--enable-per-request-metrics` returns token counts in the response body in our vLLM version and the metrics are capturable in Envoy access logs | Open | Engineering test |
 | TF-9 | Envoy AI Gateway `BackendTrafficPolicy` with `limit.fromMetadata` is available in a tagged release that can be mirrored to the internal registry | Open | Check Envoy Gateway release notes |
+| TF-10 | KServe controller and Gateway API Inference Extension perform acceptably at 50+ InferencePool/LLMInferenceService density in air-gapped OpenShift (controller reconciliation time, etcd object count, API server load) | Open | Engineering scale test: deploy 50 LLMInferenceService CRs in DEV and measure controller performance |
 
-**Gate 3 threshold:** TF-1, TF-2, and TF-6 must be CLOSED — no design without benchmarks, feasibility memo, and validated LLMInferenceService deployment. TF-3, TF-5, and TF-7 must be CLOSED. TF-4 can be ACCEPTED with documented implications for Phase 4 scope. TF-8 and TF-9 are Phase 2 requirements — can be ACCEPTED as "confirmed feasible" without full implementation.
+**Gate 3 threshold:** TF-1, TF-2, and TF-6 must be CLOSED — no design without benchmarks, feasibility memo, and validated LLMInferenceService deployment in air-gapped OpenShift. **TF-6 is the single-point-of-failure for Phase 1** — the entire architecture depends on LLMInferenceService auto-provisioning the EPP, InferencePool, and HTTPRoute. If it fails in air-gapped OpenShift, a fallback architecture using bare InferenceService must be designed. TF-3, TF-5, and TF-7 must be CLOSED. TF-4 can be ACCEPTED with documented implications for Phase 4 scope. TF-8, TF-9, and TF-10 are Phase 2 requirements — can be ACCEPTED as "confirmed feasible" without full implementation.
 
 ---
 
