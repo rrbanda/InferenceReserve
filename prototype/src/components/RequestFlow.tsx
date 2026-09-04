@@ -4,13 +4,12 @@ import styles from './RequestFlow.module.css';
 
 const nodes = [
   { id: 'client', label: 'Client' },
-  { id: 'gateway', label: 'Gateway' },
-  { id: 'auth', label: 'Auth' },
-  { id: 'httproute', label: 'HTTPRoute' },
-  { id: 'pool', label: 'Pool' },
-  { id: 'epp', label: 'EPP' },
-  { id: 'vllm', label: 'vLLM' },
-  { id: 'gpu', label: 'GPU' },
+  { id: 'gateway', label: 'Gateway (Envoy)' },
+  { id: 'auth', label: '① ext_authz' },
+  { id: 'route', label: '② Route match' },
+  { id: 'epp', label: '③ ext_proc EPP' },
+  { id: 'forward', label: 'Forward' },
+  { id: 'vllm', label: 'vLLM pod' },
 ];
 
 export default function RequestFlow() {

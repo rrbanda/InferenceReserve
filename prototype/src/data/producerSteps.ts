@@ -14,7 +14,7 @@ export const producerSteps: ProducerStep[] = [
     subtitle: 'Benchmark and price',
     description:
       'Run standardised benchmarks for each model on target GPU types, create a throughput profile documenting max tokens/sec at utilisation thresholds, and set per-tier chargeback rates in the PT catalog.',
-    codeExample: `apiVersion: inferencereserve.io/v1alpha1
+    codeExample: `apiVersion: pt.platform/v1alpha1
 kind: ThroughputProfile
 metadata:
   name: llama3-70b-h100nvl
@@ -91,7 +91,7 @@ $ kubectl get pods -n pt-team-alpha -o wide
 NAME                        NODE           STATUS
 llama70b-vllm-0             gpu-node-19    Running    # rescheduled
 llama70b-vllm-1             gpu-node-04    Running    # unaffected
-llama70b-epp-0              gpu-node-19    Running    # auto-provisioned by KServe
+llama70b-epp-0              cpu-node-02    Running    # EPP is CPU-only, auto-provisioned by KServe
 
 # SLA monitored via Prometheus alerting rules (not custom controller)
 # DCGM alerts for GPU health already deployed by GPU Operator`,
@@ -104,10 +104,10 @@ llama70b-epp-0              gpu-node-19    Running    # auto-provisioned by KSer
     description:
       'Generate utilisation reports, SLA compliance summaries, and chargeback breakdowns per tenant and cost centre. Reports feed into finance systems and executive dashboards for cost attribution and capacity planning.',
     codeExample: `# Monthly report generation
-$ ptctl report generate --month=2025-06 --format=json
+$ ptctl report generate --month=2026-08 --format=json
 
 {
-  "period": "2025-06",
+  "period": "2026-08",
   "tenants": [
     {
       "name": "team-alpha",

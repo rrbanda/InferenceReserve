@@ -13,7 +13,7 @@ export default function Hero() {
       >
         <h1 className={styles.title}>Provisioned Throughput</h1>
         <p className={styles.description}>
-          Guaranteed, SLA-bound inference capacity with dedicated GPU isolation — built on upstream Kubernetes-native AI infrastructure.
+          Guaranteed, SLA-bound inference capacity with GPU isolation — built on upstream Kubernetes-native AI infrastructure.
         </p>
         <div className={styles.stats}>
           <StatCard value="99.5%" label="Availability SLA" />

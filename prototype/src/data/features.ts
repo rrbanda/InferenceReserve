@@ -51,6 +51,6 @@ export const features: Feature[] = [
     id: 8,
     title: 'Sizing Calculator',
     description:
-      'Input your model, RPM, and token counts to get a recommended tier, GPU count, and estimated monthly cost — before committing.',
+      'Input your model, RPM, and token counts to get a recommended tier, GPU count, and estimated monthly chargeback — before committing.',
   },
 ];

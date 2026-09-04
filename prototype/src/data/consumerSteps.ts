@@ -52,7 +52,7 @@ POST /api/v1/sizing
     subtitle: 'Submit a ProvisionedThroughput CR',
     description:
       'Apply a ProvisionedThroughput custom resource via kubectl. The CR declares the model, tier, and committed TPM. The Reservation Manager validates the request against fleet capacity and applies the LLMInferenceService YAML. KServe provisions the serving stack.',
-    codeExample: `apiVersion: inferencereserve.io/v1alpha1
+    codeExample: `apiVersion: pt.platform/v1alpha1
 kind: ProvisionedThroughput
 metadata:
   name: team-alpha-llama70b
@@ -118,7 +118,7 @@ print(response.choices[0].message.content)`,
     title: 'Use',
     subtitle: 'Send inference requests',
     description:
-      'Send inference requests to your PT endpoint. Requests auto-route to your dedicated GPU pool. Use the X-PT-Request-Type header for explicit routing control between dedicated and shared pools.',
+      'Send inference requests to your PT endpoint. The Gateway runs ext_authz (tenant auth) and ext_proc (llm-d EPP picks the best pod), then forwards directly to the selected vLLM pod. Use the X-PT-Request-Type header for routing control.',
     codeExample: `// Request with routing header
 POST https://inference.internal/v1/team-alpha/chat/completions
 X-PT-Request-Type: dedicated
@@ -130,10 +130,15 @@ Authorization: Bearer $IR_API_KEY
   "stream": true
 }
 
-// Response headers
-X-PT-Pool: dedicated
-X-PT-Node: gpu-node-17
-X-PT-Cache-Hit: prefix`,
+// Response (OpenAI-compatible)
+{
+  "choices": [{"message": {"content": "..."}}],
+  "usage": {
+    "prompt_tokens": 1024,
+    "completion_tokens": 256,
+    "total_tokens": 1280
+  }
+}`,
     codeLabel: 'JSON',
   },
   {
