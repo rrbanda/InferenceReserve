@@ -9,6 +9,7 @@ export default function ComponentTable() {
           <tr>
             <th>Component</th>
             <th>Upstream Project</th>
+            <th>Phase</th>
             <th>PT Role</th>
           </tr>
         </thead>
@@ -17,6 +18,11 @@ export default function ComponentTable() {
             <tr key={comp.name} className={comp.isCustom ? styles.customRow : styles.row}>
               <td className={styles.nameCell}>{comp.name}</td>
               <td className={styles.cell}>{comp.isCustom ? 'Custom build' : comp.upstream}</td>
+              <td className={styles.phaseCell}>
+                <span className={comp.phase === 1 ? styles.phase1 : styles.phase2}>
+                  P{comp.phase}
+                </span>
+              </td>
               <td className={styles.cell}>{comp.role}</td>
             </tr>
           ))}

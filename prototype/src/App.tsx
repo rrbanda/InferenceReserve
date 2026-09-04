@@ -7,12 +7,14 @@ import ConsumerJourney from './sections/ConsumerJourney';
 import ProducerJourney from './sections/ProducerJourney';
 import Architecture from './sections/Architecture';
 import DashboardDemo from './sections/DashboardDemo';
+import DecisionGuide from './sections/DecisionGuide';
 import SectionHeader from './components/SectionHeader';
 import SizingCalculator from './components/SizingCalculator';
 import styles from './App.module.css';
 
 const sectionComponents: Record<string, React.ReactNode> = {
   overview: <ProductOverview />,
+  decision: <DecisionGuide />,
   consumer: <ConsumerJourney />,
   producer: <ProducerJourney />,
   architecture: <Architecture />,

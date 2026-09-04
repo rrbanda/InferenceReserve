@@ -1,0 +1,136 @@
+.section {
+  padding: var(--space-lg) var(--space-md);
+}
+
+.inner {
+  max-width: var(--max-width);
+  margin: 0 auto;
+}
+
+.flowTitle,
+.tableTitle {
+  font-size: var(--font-size-base);
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: var(--space-md) 0 var(--space-sm);
+}
+
+.flow {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: var(--space-lg);
+}
+
+.flowStep {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  background: var(--color-card-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+}
+
+.stepNumber {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--color-primary-navy);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.stepBody {
+  flex: 1;
+}
+
+.question {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: 6px;
+}
+
+.answers {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.yes,
+.no {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+.badge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 3px;
+  background: rgba(0, 135, 90, 0.12);
+  color: #00875A;
+  margin-right: 4px;
+}
+
+.badgeNo {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 3px;
+  background: rgba(208, 2, 27, 0.08);
+  color: #D0021B;
+  margin-right: 4px;
+}
+
+.flowResult {
+  text-align: center;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-primary-navy);
+  padding: 12px;
+  border: 2px solid var(--color-accent-cyan);
+  border-radius: var(--radius-md);
+}
+
+.tableWrapper {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-xs);
+}
+
+.table th {
+  text-align: left;
+  padding: 8px 12px;
+  background: var(--color-light-bg);
+  color: var(--color-text-secondary);
+  font-weight: 600;
+  border-bottom: 2px solid var(--color-border);
+}
+
+.table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text-primary);
+}
+
+.workloadCell {
+  font-weight: 600;
+}
+
+.recCell {
+  font-weight: 600;
+  color: var(--color-primary-navy);
+}

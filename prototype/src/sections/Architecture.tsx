@@ -3,9 +3,10 @@ import SubTabs from '../components/SubTabs';
 import ArchDiagram from '../components/ArchDiagram';
 import RequestFlow from '../components/RequestFlow';
 import ComponentTable from '../components/ComponentTable';
+import PhaseRoadmap from '../components/PhaseRoadmap';
 import styles from './Architecture.module.css';
 
-const tabs = ['Diagram', 'Request Flow', 'Component Map', 'Build Gap'];
+const tabs = ['Diagram', 'Request Flow', 'Component Map', 'Phase Map', 'Build Gap'];
 
 export default function Architecture() {
   const [activeTab, setActiveTab] = useState('Diagram');
@@ -26,6 +27,10 @@ export default function Architecture() {
 
           {activeTab === 'Component Map' && (
             <ComponentTable />
+          )}
+
+          {activeTab === 'Phase Map' && (
+            <PhaseRoadmap />
           )}
 
           {activeTab === 'Build Gap' && (

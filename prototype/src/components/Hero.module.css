@@ -9,17 +9,43 @@
   margin: 0 auto;
 }
 
+.problemLabel {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.45);
+  margin-bottom: 6px;
+}
+
 .title {
   font-size: var(--font-size-2xl);
   font-weight: var(--font-weight-bold);
   color: var(--color-text-on-dark);
-  margin-bottom: 4px;
+  margin-bottom: 8px;
 }
 
 .description {
   font-size: var(--font-size-sm);
-  color: rgba(255, 255, 255, 0.75);
-  max-width: 520px;
+  color: rgba(255, 255, 255, 0.7);
+  max-width: 560px;
+  margin: 0 auto 20px;
+  line-height: var(--line-height-normal);
+}
+
+.solutionLabel {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--color-accent-cyan);
+  margin-bottom: 4px;
+}
+
+.solutionText {
+  font-size: var(--font-size-sm);
+  color: rgba(255, 255, 255, 0.85);
+  max-width: 540px;
   margin: 0 auto var(--space-md);
   line-height: var(--line-height-normal);
 }

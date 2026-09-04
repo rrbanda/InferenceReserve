@@ -89,6 +89,45 @@ export default function SizingCalculator() {
       </div>
 
       <div className={styles.results}>
+        <div className={styles.resultsTitle}>Burndown Rate Breakdown</div>
+
+        <div className={styles.breakdownTable}>
+          <div className={styles.breakdownRow}>
+            <span className={styles.breakdownLabel}>Input tokens</span>
+            <span className={styles.breakdownCalc}>
+              {formatNumber(avgInputTokens)} x 1.0x
+            </span>
+            <span className={styles.breakdownResult}>
+              = {formatNumber(avgInputTokens)} weighted
+            </span>
+          </div>
+          <div className={styles.breakdownRow}>
+            <span className={styles.breakdownLabel}>Output tokens</span>
+            <span className={styles.breakdownCalc}>
+              {formatNumber(avgOutputTokens)} x 4.0x
+            </span>
+            <span className={styles.breakdownResult}>
+              = {formatNumber(avgOutputTokens * 4)} weighted
+            </span>
+          </div>
+          <div className={styles.breakdownDivider} />
+          <div className={styles.breakdownRow}>
+            <span className={styles.breakdownLabel}>Per request</span>
+            <span className={styles.breakdownCalc} />
+            <span className={styles.breakdownResult}>
+              = {formatNumber(avgInputTokens + avgOutputTokens * 4)} weighted tokens
+            </span>
+          </div>
+          <div className={styles.breakdownRow}>
+            <span className={styles.breakdownLabel}>x {rpm} RPM</span>
+            <span className={styles.breakdownCalc} />
+            <span className={styles.breakdownResult}>
+              = {formatNumber((avgInputTokens + avgOutputTokens * 4) * rpm)} weighted TPM
+            </span>
+          </div>
+        </div>
+
+        <div className={styles.resultsDivider} />
         <div className={styles.resultsTitle}>Sizing Estimate</div>
 
         <div className={styles.resultRow}>

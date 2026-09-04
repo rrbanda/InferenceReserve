@@ -120,3 +120,48 @@
   composes: resultValue;
   color: var(--color-success-green);
 }
+
+.breakdownTable {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: var(--color-light-bg, #F5F7FA);
+  border-radius: var(--border-radius);
+  padding: 10px 12px;
+  font-size: 12px;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+}
+
+.breakdownRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1.2fr;
+  gap: 8px;
+  align-items: baseline;
+}
+
+.breakdownLabel {
+  color: var(--color-text-secondary);
+}
+
+.breakdownCalc {
+  color: var(--color-text-tertiary, #8A95A5);
+  text-align: right;
+}
+
+.breakdownResult {
+  font-weight: 600;
+  color: var(--color-text-primary);
+  text-align: right;
+}
+
+.breakdownDivider {
+  height: 1px;
+  background: var(--color-border);
+  margin: 4px 0;
+}
+
+.resultsDivider {
+  height: 1px;
+  background: var(--color-border);
+  margin: 4px 0;
+}
