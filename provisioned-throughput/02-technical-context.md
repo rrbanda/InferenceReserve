@@ -51,9 +51,34 @@ Concurrent 128k-context requests per GPU: 62 GB ÷ 40 GB = ~1.5
 
 **PT implication:** The TPM a customer can buy is bounded not by GPU compute but by KV cache memory. GQA (used in LLaMA-3 and most modern models) dramatically reduces KV cache size per token — 8× smaller than MHA — enabling far more concurrent requests per GPU. However, a customer requesting long-context PT (128k token contexts) still gets far fewer concurrent request slots per GPU than short-context workloads. The PT sizing model must account for context length, not just request rate.
 
-### 1.3 Throughput Benchmarks — Must Be Measured, Not Assumed
+### 1.3 Throughput Estimation and Benchmarking
 
-These are the numbers that determine PT pricing floors. They do not exist yet — benchmarks must be run on our actual hardware with our actual vLLM configuration.
+These are the numbers that determine PT chargeback rate floors. First-order estimates should be generated using [AIConfigurator](https://github.com/ai-dynamo/aiconfigurator) (`aiconfigurator cli recommend` with `--backend vllm`), then validated with on-hardware benchmarks.
+
+**AIConfigurator system mapping for our fleet:**
+
+| Our GPU | AIConfigurator `--system` | Profile Level | Notes |
+|---|---|---|---|
+| H100 NVL (94 GB) | `h100_pcie` | Estimate-only (HYBRID/EMPIRICAL) | NVLink bridge not modeled; validate on hardware |
+| H100 SXM (80 GB) | `h100_sxm` | Full SILICON profiled | Direct match |
+| H200 NVL (141 GB) | `h200_sxm` | Full SILICON profiled | Memory matches; interconnect differs |
+| A100 80GB | `a100_pcie` | Estimate-only | MIG partitions not modeled |
+
+**Example:** Generate a throughput profile for LLaMA-3 70B on H100 NVL:
+```bash
+aiconfigurator cli recommend \
+  --model-path meta-llama/Llama-3.1-70B-Instruct \
+  --system h100_pcie \
+  --backend vllm \
+  --target-request-rate 30 \
+  --ttft 500 \
+  --tpot 50 \
+  --deployment-target llm-d
+```
+
+This outputs the minimum GPU count, optimal TP/PP configuration, estimated TTFT/TPOT, and llm-d Helm values. The `--ttft` and `--tpot` SLA constraints filter configurations that exceed the latency targets.
+
+**On-hardware validation is still required.** AIConfigurator estimates for `h100_pcie` use HYBRID mode (not SILICON-profiled data) and do not account for NVLink bridge topology. Final PT throughput profiles must be validated with vLLM benchmarks on our actual hardware before setting chargeback rates.
 
 | Model | GPU Config | Expected Output Throughput | Status |
 |---|---|---|---|

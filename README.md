@@ -38,6 +38,7 @@ All infrastructure is upstream. The custom build is a thin business layer.
 | **Ingress** | Token counting, rate limiting, tenant auth | Envoy AI Gateway |
 | **Quotas** | Per-team GPU quotas, fair sharing, preemption | Kueue |
 | **Observability** | GPU + inference metrics | DCGM + Prometheus |
+| **Sizing** | Throughput profiles, KV cache analysis, GPU sizing | [AIConfigurator](https://github.com/ai-dynamo/aiconfigurator) + [ConfigIQ](https://configiq.dev/) |
 | | | |
 | **Reservations** | Who gets how much, for how long, at what price | **Custom: Reservation Manager** |
 | **Billing** | Token aggregation, burndown rates, chargeback | **Custom: Billing Pipeline** |

@@ -156,6 +156,16 @@ export default function SizingCalculator() {
           <span className={styles.resultLabel}>Est. Monthly Chargeback</span>
           <span className={styles.costValue}>{formatCurrency(result.monthlyCost)}</span>
         </div>
+
+        <div className={styles.disclaimer}>
+          Illustrative estimate using hardcoded throughput profiles. Production sizing uses{' '}
+          <a href="https://github.com/ai-dynamo/aiconfigurator" target="_blank" rel="noopener noreferrer">
+            AIConfigurator
+          </a>{' '}
+          (<code>aiconfigurator cli recommend --backend vllm</code>) for profiled GPU performance
+          models, validated against on-hardware benchmarks. Web UI:{' '}
+          <a href="https://configiq.dev" target="_blank" rel="noopener noreferrer">ConfigIQ</a>.
+        </div>
       </div>
     </div>
   );

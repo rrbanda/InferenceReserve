@@ -312,7 +312,29 @@ All features documented in `02-technical-context.md` remain accurate. Additional
 | Small (MIG) | 2g.20gb | 0.90 | Benchmark-derived | auto | 1 |
 | Micro (MIG) | 1g.10gb | 0.90 | Benchmark-derived | auto | 1 |
 
-**Model throughput profiles** — a data table mapping (model, GPU type, vLLM config) → (max TPM at 70% utilisation, P95 TTFT, recommended `max-num-seqs`). Produced by the Engineering benchmark spike. Consumed by the Sizing Calculator and Reservation Manager to translate a customer's TPM commitment into the correct number of replicas and GPU allocation.
+**Model throughput profiles** — a data table mapping (model, GPU type, vLLM config) → (max TPM at 70% utilisation, P95 TTFT, recommended `max-num-seqs`). Produced using [AIConfigurator](https://github.com/ai-dynamo/aiconfigurator) (`aiconfigurator cli recommend`) with validation against on-hardware benchmarks. Consumed by the Sizing Calculator and Reservation Manager to translate a team's TPM commitment into the correct number of replicas and GPU allocation.
+
+**AIConfigurator Integration**
+
+[AIConfigurator](https://github.com/ai-dynamo/aiconfigurator) (CLI + REST API, web frontend: [ConfigIQ](https://configiq.dev/)) provides GPU sizing, performance estimation, and KV cache capacity analysis for vLLM, TRT-LLM, and SGLang. It replaces our manual throughput estimation with profiled kernel-level performance models.
+
+How it integrates with PT:
+
+1. **Throughput profile generation:** `aiconfigurator cli recommend --model-path <model> --system <gpu> --backend vllm --target-request-rate <RPM/60>` finds the minimum GPU count and optimal deployment config (TP, PP, batch size) for a target request rate. Output populates the `ThroughputProfile` CRD.
+2. **KV cache capacity validation:** `aiconfigurator cli default --model-path <model> --system <gpu> --backend vllm --total-gpus <N>` reports memory breakdown including KV cache capacity, validating that the PT reservation can hold the expected concurrent requests.
+3. **TTFT/TPOT estimation:** AIConfigurator estimates TTFT and TPOT per config with SLA filtering (`--ttft`, `--tpot`), providing the latency targets for the PT SLA.
+4. **Deployment artifact generation:** `--deployment-target llm-d` generates llm-d Helm values, directly feeding the LLMInferenceService spec.
+
+Fleet GPU mapping to AIConfigurator system names:
+
+| Our Fleet GPU | AIConfigurator System | Profile Status | Notes |
+|---|---|---|---|
+| H100 NVL (94 GB, PCIe + NVLink bridge) | `h100_pcie` | Estimate-only | Closest match; NVLink bridge bandwidth not modeled. Validate with on-hardware benchmarks. |
+| H100 SXM (80 GB, NVSwitch) | `h100_sxm` | Full SILICON profiled | Direct match. |
+| H200 NVL (141 GB, PCIe + NVLink bridge) | `h200_sxm` | Full SILICON profiled | Memory capacity matches but interconnect differs (SXM NVSwitch vs NVL NVLink bridge). |
+| A100 80GB (PCIe, MIG-capable) | `a100_pcie` | Estimate-only | Closest match. MIG partitions not modeled by AIConfigurator. |
+
+> **Important:** AIConfigurator's SILICON-profiled data is collected on SXM form-factor GPUs. Our H100 NVL and A100 PCIe GPUs have different interconnect characteristics (NVLink bridge vs NVSwitch, PCIe vs SXM). AIConfigurator estimates provide a strong first-order approximation but must be validated against benchmarks on our actual hardware before setting PT chargeback rates. The `h100_pcie` and `a100_pcie` profiles use HYBRID or EMPIRICAL mode, not SILICON — results are directional, not reproducible.
 
 ---
 
@@ -618,6 +640,8 @@ A lightweight controller or CronJob that watches PT-specific health signals and 
 | vLLM | vllm-project/vllm | v0.18+ (V1) | Independent | Production |
 | Kueue | kubernetes-sigs/kueue | v0.9+ | SIG-Scheduling | GA |
 | DCGM | NVIDIA/dcgm-exporter | latest | Independent | Production |
+| AIConfigurator | ai-dynamo/aiconfigurator | v0.10+ | Independent | Production — GPU sizing, throughput estimation, KV cache analysis |
+| ConfigIQ | redhat-performance/configiq | latest | Independent | Production — web frontend for AIConfigurator (sizing calculator, GPU explorer) |
 | NVIDIA GPU Operator | NVIDIA/gpu-operator | latest | Independent | Production |
 
 ### Air-Gap Considerations

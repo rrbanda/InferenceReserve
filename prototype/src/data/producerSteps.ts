@@ -13,8 +13,18 @@ export const producerSteps: ProducerStep[] = [
     title: 'Catalog Model',
     subtitle: 'Benchmark and price',
     description:
-      'Run standardised benchmarks for each model on target GPU types, create a throughput profile documenting max tokens/sec at utilisation thresholds, and set per-tier chargeback rates in the PT catalog.',
-    codeExample: `apiVersion: pt.platform/v1alpha1
+      'Use AIConfigurator to generate throughput profiles for each model on target GPU types. Validate estimates with on-hardware benchmarks, then set per-tier chargeback rates in the PT catalog.',
+    codeExample: `# Step 1: Generate throughput profile with AIConfigurator
+aiconfigurator cli recommend \\
+  --model-path meta-llama/Llama-3.1-70B-Instruct \\
+  --system h100_pcie \\
+  --backend vllm \\
+  --target-request-rate 30 \\
+  --ttft 500 --tpot 50 \\
+  --deployment-target llm-d
+
+# Step 2: Create ThroughputProfile CRD from results
+apiVersion: pt.platform/v1alpha1
 kind: ThroughputProfile
 metadata:
   name: llama3-70b-h100nvl
@@ -22,16 +32,12 @@ spec:
   model: llama3-70b
   gpuType: h100-nvl
   gpusPerReplica: 8
+  source: aiconfigurator   # estimates validated on hardware
   benchmarks:
-    - utilisation: 50%
-      tokensPerSec: 3200
     - utilisation: 70%
-      tokensPerSec: 2500
-    - utilisation: 90%
-      tokensPerSec: 1800
+      tokensPerSec: 2500   # from benchmark, not AIC estimate
   chargeback:
-    chargebackPer1kTPMHour: 0.30
-    currency: USD`,
+    chargebackPer1kTPMHour: 0.30`,
     codeLabel: 'YAML',
   },
   {

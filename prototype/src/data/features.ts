@@ -49,8 +49,8 @@ export const features: Feature[] = [
   },
   {
     id: 8,
-    title: 'Sizing Calculator',
+    title: 'Sizing Calculator (AIConfigurator-powered)',
     description:
-      'Input your model, RPM, and token counts to get a recommended tier, GPU count, and estimated monthly chargeback — before committing.',
+      'Input your model, RPM, and token counts to get a recommended tier, GPU count, and estimated monthly chargeback. Production sizing powered by AIConfigurator with profiled GPU performance models.',
   },
 ];

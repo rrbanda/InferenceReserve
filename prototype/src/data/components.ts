@@ -81,6 +81,14 @@ export const components: ArchComponent[] = [
     phase: 2,
   },
   {
+    name: 'AIConfigurator',
+    upstream: 'ai-dynamo/aiconfigurator',
+    status: 'Production',
+    role: 'GPU sizing, throughput estimation, KV cache analysis for vLLM. Powers ThroughputProfile generation via recommend mode. Web UI: ConfigIQ.',
+    isCustom: false,
+    phase: 1,
+  },
+  {
     name: 'Reservation Manager',
     upstream: 'Custom build',
     status: 'To build',
