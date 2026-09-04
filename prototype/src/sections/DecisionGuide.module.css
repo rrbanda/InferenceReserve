@@ -97,7 +97,7 @@
   font-weight: 600;
   color: var(--color-primary-navy);
   padding: 12px;
-  border: 2px solid var(--color-accent-cyan);
+  border: 2px solid var(--color-accent-blue);
   border-radius: var(--radius-md);
 }
 

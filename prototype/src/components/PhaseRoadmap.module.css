@@ -81,7 +81,7 @@
 
 .colTitleBuild {
   composes: colTitle;
-  color: var(--color-accent-cyan);
+  color: var(--color-accent-blue);
 }
 
 .colTitleUpstream {
