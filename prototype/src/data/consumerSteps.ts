@@ -52,7 +52,7 @@ POST /api/v1/sizing
     subtitle: 'Submit a ProvisionedThroughput CR',
     description:
       'Apply a ProvisionedThroughput custom resource via kubectl. The CR declares the model, tier, and committed TPM. The Reservation Manager validates the request against fleet capacity and applies the LLMInferenceService YAML. KServe provisions the serving stack.',
-    codeExample: `apiVersion: pt.epio.net/v1alpha1
+    codeExample: `apiVersion: inferencereserve.io/v1alpha1
 kind: ProvisionedThroughput
 metadata:
   name: team-alpha-llama70b
@@ -74,7 +74,7 @@ spec:
     title: 'Provision',
     subtitle: 'Watch status transitions',
     description:
-      'Monitor the reservation as it transitions through Pending → Provisioning → Active. The operator allocates GPUs, deploys vLLM replicas, configures routing, and provisions the Grafana dashboard.',
+      'Monitor the reservation as it transitions through Pending → Provisioning → Active. The Reservation Manager applies the LLMInferenceService YAML. KServe provisions vLLM pods, llm-d EPP, InferencePool, and HTTPRoute. The NVIDIA GPU Operator allocates GPUs to the pods.',
     codeExample: `$ kubectl get pt team-alpha-llama70b -w
 NAME                    MODEL        TIER  TPM     STATUS
 team-alpha-llama70b     llama3-70b   M     75000   Pending
@@ -84,9 +84,11 @@ team-alpha-llama70b     llama3-70b   M     75000   Active
 $ kubectl describe pt team-alpha-llama70b
 Status:
   Phase: Active
-  Endpoint: https://pt.epio.net/v1/team-alpha/llama3-70b
-  GPUs Allocated: 16x H100-NVL
-  Dashboard: https://grafana.epio.net/d/pt-team-alpha`,
+  Endpoint: https://inference.internal/v1/team-alpha/llama3-70b
+  GPUs Allocated: 16x H100-NVL (via NVIDIA GPU Operator)
+  Serving: LLMInferenceService (KServe v0.17)
+  Routing: InferencePool + llm-d EPP (auto-provisioned by KServe)
+  Dashboard: https://grafana.internal/d/pt-team-alpha`,
     codeLabel: 'shell',
   },
   {
@@ -98,8 +100,8 @@ Status:
     codeExample: `from openai import OpenAI
 
 client = OpenAI(
-    base_url="https://pt.epio.net/v1/team-alpha",
-    api_key=os.environ["EPIO_API_KEY"],
+    base_url="https://inference.internal/v1/team-alpha",
+    api_key=os.environ["IR_API_KEY"],
 )
 
 response = client.chat.completions.create(
@@ -117,9 +119,9 @@ print(response.choices[0].message.content)`,
     description:
       'Send inference requests to your PT endpoint. Requests auto-route to your dedicated GPU pool. Use the X-PT-Request-Type header for explicit routing control between dedicated and shared pools.',
     codeExample: `// Request with routing header
-POST https://pt.epio.net/v1/team-alpha/chat/completions
+POST https://inference.internal/v1/team-alpha/chat/completions
 X-PT-Request-Type: dedicated
-Authorization: Bearer $EPIO_API_KEY
+Authorization: Bearer $IR_API_KEY
 
 {
   "model": "llama3-70b",

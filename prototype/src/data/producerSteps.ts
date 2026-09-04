@@ -14,7 +14,7 @@ export const producerSteps: ProducerStep[] = [
     subtitle: 'Benchmark and price',
     description:
       'Run standardised benchmarks for each model on target GPU types, create a throughput profile documenting max tokens/sec at utilisation thresholds, and set per-tier pricing in the PT catalog.',
-    codeExample: `apiVersion: pt.epio.net/v1alpha1
+    codeExample: `apiVersion: inferencereserve.io/v1alpha1
 kind: ThroughputProfile
 metadata:
   name: llama3-70b-h100nvl
@@ -68,8 +68,11 @@ $ kubectl approve pt team-beta-mistral7b \\
     --capacity-check=pass \\
     --approver=platform-ops@corp.com
 
-provisionedthroughput.pt.epio.net/team-beta-mistral7b approved
-Status: Pending → Provisioning`,
+provisionedthroughput.inferencereserve.io/team-beta-mistral7b approved
+# Reservation Manager applies LLMInferenceService YAML
+# KServe provisions: vLLM pods + llm-d EPP + InferencePool + HTTPRoute
+# NVIDIA GPU Operator allocates GPUs to pods
+Status: Pending → Provisioning → Active`,
     codeLabel: 'shell',
   },
   {
@@ -77,21 +80,21 @@ Status: Pending → Provisioning`,
     title: 'Operate',
     subtitle: 'Day-2 operations',
     description:
-      'Handle node failures with automated replica rescheduling, coordinate driver updates during maintenance windows, and manage GPU node cordoning without breaching tenant SLAs.',
-    codeExample: `# Maintenance window procedure
+      'Handle node failures and maintenance using standard Kubernetes operations. KServe manages pod lifecycle. The NVIDIA GPU Operator handles driver updates. Prometheus alerting rules monitor SLA compliance. No custom operator needed — this is standard platform ops.',
+    codeExample: `# Maintenance: cordon node, KServe reschedules pods
 $ kubectl cordon gpu-node-12 --reason="driver-update"
+# KServe detects pod disruption, schedules replacement on available node
+# NVIDIA GPU Operator allocates GPU on new node
+# llm-d EPP automatically routes traffic to healthy pods
 
-# Reservation Manager response:
-# 1. Identifies affected reservations
-# 2. Schedules replacement replicas on available nodes
-# 3. Waits for health checks to pass
-# 4. Drains original pods
-# 5. Logs SLA impact (if any)
+$ kubectl get pods -n pt-team-alpha -o wide
+NAME                        NODE           STATUS
+llama70b-vllm-0             gpu-node-19    Running    # rescheduled
+llama70b-vllm-1             gpu-node-04    Running    # unaffected
+llama70b-epp-0              gpu-node-19    Running    # auto-provisioned by KServe
 
-$ kubectl get events --field-selector reason=PTRebalance
-LAST SEEN   TYPE     REASON        MESSAGE
-2m          Normal   PTRebalance   Replica moved: gpu-node-12 → gpu-node-19
-2m          Normal   PTHealthy     All replicas healthy, SLA maintained`,
+# SLA monitored via Prometheus alerting rules (not custom controller)
+# DCGM alerts for GPU health already deployed by GPU Operator`,
     codeLabel: 'shell',
   },
   {
